@@ -8,9 +8,14 @@ import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 export class UsersRepository {
   constructor (@InjectRepository(User) private readonly usersRepository: Repository<User>) {}
 
-  async createUser({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<User> {
+  async getUserByEmail(email: string) {
+    return await this.usersRepository.findOne({ where: { email } });
+  }
+
+  async signUp({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>> {
     const user: User = await this.usersRepository.create({name, email, password, phone, country, address, city});
     const result: User = await this.usersRepository.save(user);
-    return result;
+    const {password: userPassword, ...userWithoutPassword} = result;
+    return userWithoutPassword;
   }
 }

@@ -7,8 +7,8 @@ import { User } from './users.entity';
 export class UsersController {
   constructor (private readonly usersService: UsersService) {}
 
-  @Post()
-  async createUser(@Body() {name, email, password, phone, country, address, city}: UsersBodyDto): Promise<User> {
-    return await this.usersService.createUser({name, email, password, phone, country, address, city});
+  @Post('signup')
+  async signUp(@Body() {name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>> {
+    return await this.usersService.signUp({name, email, password, phone, country, address, city});
   }
 }
