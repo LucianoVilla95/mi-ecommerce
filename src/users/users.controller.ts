@@ -3,6 +3,7 @@ import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
+import { AuthResponseDto } from './dtos/authResponse.dto';
 
 @Controller('users')
 export class UsersController {
@@ -14,7 +15,7 @@ export class UsersController {
   }
 
   @Post('signin')
-  async signIn(@Body() {email, password}: UsersCredentialsDto): Promise<Omit<User, 'password'>> {
+  async signIn(@Body() {email, password}: UsersCredentialsDto): Promise<AuthResponseDto> {
     return await this.usersService.signIn({email, password});
   }
 }

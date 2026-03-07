@@ -4,10 +4,14 @@ import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
 import * as bcrypt from 'bcrypt';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AuthResponseDto } from './dtos/authResponse.dto';
 
 @Injectable()
 export class UsersService {
-  constructor (private readonly usersRepository: UsersRepository) {}
+  constructor (private readonly usersRepository: UsersRepository,
+    private readonly jwtService: JwtService
+  ) {}
 
   async signUp({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>>  {
     try {
@@ -34,7 +38,7 @@ export class UsersService {
     }
   }
 
-  async signIn({email, password}: UsersCredentialsDto): Promise<Omit<User, 'password'>> {
+  async signIn({email, password}: UsersCredentialsDto): Promise<AuthResponseDto> {
     try {
       const dbUser: User | null = await this.usersRepository.getUserByEmail(email);
 
@@ -42,15 +46,22 @@ export class UsersService {
         throw new UnauthorizedException('Invalid credentials')
       }
 
-      const isPasswordValid = await bcrypt.compare(password, dbUser.password)
+      const isPasswordValid: boolean = await bcrypt.compare(password, dbUser.password)
 
       if(!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
       }
 
+      const userPayload = {
+        sub: dbUser.id,
+        email: dbUser.email
+      }
+
+      const token: string = await this.jwtService.sign(userPayload); 
+
       const {password: userPassword, ...userWithoutPassword} = dbUser;
 
-      return userWithoutPassword;
+      return {user: userWithoutPassword, access_token: token};
 
     } catch (error) {
 
