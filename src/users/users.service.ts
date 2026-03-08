@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResponseDto } from './dtos/authResponse.dto';
+import { JwtPayload } from '../users/interfaces/jwtPayload.interface';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,7 @@ export class UsersService {
   async signUp({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>>  {
     try {
       const userExists: User | null = await this.usersRepository.getUserByEmail(email);
-       
+      
       if (userExists) {
         throw new ConflictException('Email already registered');
       }
@@ -52,9 +53,12 @@ export class UsersService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const userPayload = {
+      const userPayload: JwtPayload = {
         sub: dbUser.id,
-        email: dbUser.email
+        email: dbUser.email,
+        role: dbUser.role,
+        isBlocked: dbUser.isBlocked,
+        isDeleted: dbUser.isDeleted
       }
 
       const token: string = await this.jwtService.sign(userPayload); 

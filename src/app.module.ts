@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import typeOrmConfig from './config/typeorm';
 import { UsersModule } from './users/users.module';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => configService.getOrThrow<TypeOrmModuleOptions>('typeorm')
     }),
+    PassportModule,
     JwtModule.register({
       global: true,
       signOptions: { expiresIn: '1h' },
@@ -22,6 +25,6 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   UsersModule],
   controllers: [],
-  providers: [],
+  providers: [JwtStrategy],
 })
 export class AppModule {}
