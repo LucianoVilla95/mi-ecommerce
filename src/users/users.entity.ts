@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import { UserRole } from '../users/enums/userRole.enum';
 
 @Entity({
   name: 'users'
@@ -28,4 +29,17 @@ export class User {
 
   @Column({length: 50})
   city: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER
+  })
+  role: UserRole;
+
+  @Column({ default: false })
+  isBlocked: boolean;
+
+  @Column({ default: false })
+  isDeleted: boolean;
 }
