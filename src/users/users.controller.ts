@@ -24,7 +24,7 @@ export class UsersController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  getProfile(@CurrentUser() user: JwtPayload) {
-    return user;
+  async getProfile(@CurrentUser() user: JwtPayload): Promise<Omit<User, 'password'>| null> {
+    return await this.usersService.getUserById(user.sub);
   }
 }

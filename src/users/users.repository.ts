@@ -18,4 +18,12 @@ export class UsersRepository {
     const {password: userPassword, ...userWithoutPassword} = result;
     return userWithoutPassword;
   }
+
+  async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
+    const user: User | null = await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
+    });
+    return user;
+  }
 }

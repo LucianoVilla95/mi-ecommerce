@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
@@ -75,5 +75,15 @@ export class UsersService {
 
       throw new InternalServerErrorException('Login error');
     }   
+  }
+
+  async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
+    const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
+    
+    if (!user) {
+      throw new NotFoundException(`User with ${id} not found`);
+    }
+
+    return user;
   }
 }
