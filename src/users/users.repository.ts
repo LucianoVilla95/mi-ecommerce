@@ -3,25 +3,37 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
 import { Repository } from 'typeorm';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
+import { UserRole } from './enums/userRole.enum';
 
 @Injectable()
 export class UsersRepository {
   constructor (@InjectRepository(User) private readonly usersRepository: Repository<User>) {}
 
   async getUserByEmail(email: string) {
-    return await this.usersRepository.findOne({ where: { email } });
+    return await this.usersRepository.findOne({ where: { email, isDeleted: false } });
   }
 
-  async signUp({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>> {
-    const user: User = await this.usersRepository.create({name, email, password, phone, country, address, city});
+  async signUp({name, email, password, phone, country, address, city, role = UserRole.USER}: UsersBodyDto): Promise<Omit<User, 'password'>> {
+    const user: User = await this.usersRepository.create({name, email, password, phone, country, address, city, role});
     const result: User = await this.usersRepository.save(user);
     const {password: userPassword, ...userWithoutPassword} = result;
     return userWithoutPassword;
   }
 
+  async getUsers (pageSize: number, skip: number): Promise<[Omit<User[], 'password'>, number]> {
+    const [users, total]: [User[], number] = await this.usersRepository.findAndCount({
+      skip: skip,
+      take: pageSize,
+      where: { isDeleted: false, role: UserRole.USER },
+      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
+    });
+
+    return [users, total];
+  }
+
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
     const user: User | null = await this.usersRepository.findOne({
-      where: { id },
+      where: { id, isDeleted: false },
       select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
     });
     return user;

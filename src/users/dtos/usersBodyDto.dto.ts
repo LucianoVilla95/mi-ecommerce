@@ -1,4 +1,5 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, MinLength, MaxLength, Matches} from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, MinLength, MaxLength, Matches, IsEnum} from 'class-validator';
+import { UserRole } from '../enums/userRole.enum';
 
 export class UsersBodyDto {
   @IsString()
@@ -46,4 +47,8 @@ export class UsersBodyDto {
   @MinLength(5)
   @MaxLength(50)
   city: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }

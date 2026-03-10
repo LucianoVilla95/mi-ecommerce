@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
@@ -6,7 +6,10 @@ import * as bcrypt from 'bcrypt';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResponseDto } from './dtos/authResponse.dto';
-import { JwtPayload } from '../users/interfaces/jwtPayload.interface';
+import { JwtPayload } from './interfaces/jwtPayload.interface';
+import { UsersQueryDto } from './dtos/usersQueryDto.dto';
+import { PaginationResult } from './interfaces/paginationMeta.interface';
+import { UserRole } from './enums/userRole.enum';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +17,7 @@ export class UsersService {
     private readonly jwtService: JwtService
   ) {}
 
-  async signUp({name, email, password, phone, country, address, city}: UsersBodyDto): Promise<Omit<User, 'password'>>  {
+  async signUp({name, email, password, phone, country, address, city, role = UserRole.USER}: UsersBodyDto): Promise<Omit<User, 'password'>>  {
     try {
       const userExists: User | null = await this.usersRepository.getUserByEmail(email);
       
@@ -27,7 +30,7 @@ export class UsersService {
         throw new BadRequestException('Password could not be hashed');
       }
 
-      return await this.usersRepository.signUp({name, email, password: hashedPassword, phone, country, address, city})
+      return await this.usersRepository.signUp({name, email, password: hashedPassword, phone, country, address, city, role})
 
     } catch (error) {
 
@@ -77,11 +80,53 @@ export class UsersService {
     }   
   }
 
+  async getUsers({page, limit}: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password'>>> {
+    const currentPage: number = page && page > 0 ? page : 1;
+    const pageSize: number = limit && limit > 0 ? Math.min(limit, 100) : 10;
+    const skip: number = (currentPage - 1) * pageSize;
+    
+    try{
+      const result: [User[], number] = await this.usersRepository.getUsers(pageSize, skip);
+
+      const data = result[0].map(user => {
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          country: user.country,
+          address: user.address,
+          city: user.city,
+          role: user.role,
+          isBlocked: user.isBlocked,
+          isDeleted: user.isDeleted
+        }
+      });
+      
+      return {
+        data: data,
+        meta: {
+          total: result[1],
+          currentPage,
+          lastPage: Math.ceil(result[1] / pageSize)
+        }
+      }
+
+    } catch (error) {
+      console.error('Error getting users:', error);
+      throw new Error('Could not get users at this time');
+    }
+}
+
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
     
     if (!user) {
       throw new NotFoundException(`User with ${id} not found`);
+    }
+
+    if (user.isBlocked) {
+    throw new ForbiddenException(`User with ${id} is blocked`);
     }
 
     return user;
