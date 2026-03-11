@@ -21,22 +21,17 @@ export class UsersService {
     try {
       const userExists: User | null = await this.usersRepository.getUserByEmail(email);
       
-      if (userExists) {
-        throw new ConflictException('Email already registered');
-      }
+      if (userExists) throw new ConflictException('Email already registered');
 
       const hashedPassword: string = await bcrypt.hash(password, 10);
-      if (!hashedPassword) {
-        throw new BadRequestException('Password could not be hashed');
-      }
+
+      if (!hashedPassword) throw new BadRequestException('Password could not be hashed');
 
       return await this.usersRepository.signUp({name, email, password: hashedPassword, phone, country, address, city, role})
 
     } catch (error) {
 
-      if (error instanceof ConflictException || error instanceof BadRequestException) {
-        throw error;
-      }
+      if (error instanceof ConflictException || error instanceof BadRequestException) throw error;
 
       throw new InternalServerErrorException('Error creating user');
     }
@@ -46,15 +41,11 @@ export class UsersService {
     try {
       const dbUser: User | null = await this.usersRepository.getUserByEmail(email);
 
-      if (!dbUser) {
-        throw new UnauthorizedException('Invalid credentials')
-      }
+      if (!dbUser) throw new UnauthorizedException('Invalid credentials')
 
       const isPasswordValid: boolean = await bcrypt.compare(password, dbUser.password)
 
-      if(!isPasswordValid) {
-        throw new UnauthorizedException('Invalid credentials');
-      }
+      if(!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
 
       const userPayload: JwtPayload = {
         sub: dbUser.id,
@@ -72,9 +63,7 @@ export class UsersService {
 
     } catch (error) {
 
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
+      if (error instanceof UnauthorizedException) throw error;
 
       throw new InternalServerErrorException('Login error');
     }   
@@ -88,7 +77,7 @@ export class UsersService {
     try{
       const result: [User[], number] = await this.usersRepository.getUsers(pageSize, skip);
 
-      const data = result[0].map(user => {
+      const data: Omit<User, 'password'>[] = result[0].map(user => {
         return {
           id: user.id,
           name: user.name,
@@ -116,19 +105,25 @@ export class UsersService {
       console.error('Error getting users:', error);
       throw new Error('Could not get users at this time');
     }
-}
+  }
 
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
     
-    if (!user) {
-      throw new NotFoundException(`User with ${id} not found`);
-    }
-
-    if (user.isBlocked) {
-    throw new ForbiddenException(`User with ${id} is blocked`);
-    }
+    if (!user) throw new NotFoundException(`User with ${id} not found`);
 
     return user;
   }
+
+  async deleteUser(id: string): Promise<{message: string}> {
+
+    const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return await this.usersRepository.deleteUser(id);
+
+  }
+
+
 }

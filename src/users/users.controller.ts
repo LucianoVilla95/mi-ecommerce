@@ -1,4 +1,4 @@
-import { Controller, Post,Get, Put, Delete, Body, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post,Get, Put, Delete, Body, UseGuards, Query, Param } from '@nestjs/common';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
@@ -37,4 +37,12 @@ export class UsersController {
   async getProfile(@CurrentUser() user: JwtPayload): Promise<Omit<User, 'password'>| null> {
     return await this.usersService.getUserById(user.sub);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Delete(':id')
+  async deleteUser (@Param('id') id: string) {
+    return await this.usersService.deleteUser(id);
+  }
+
 }

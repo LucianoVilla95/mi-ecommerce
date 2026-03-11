@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UserRole } from './enums/userRole.enum';
 
@@ -9,7 +9,7 @@ import { UserRole } from './enums/userRole.enum';
 export class UsersRepository {
   constructor (@InjectRepository(User) private readonly usersRepository: Repository<User>) {}
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise <User | null> {
     return await this.usersRepository.findOne({ where: { email, isDeleted: false } });
   }
 
@@ -32,10 +32,20 @@ export class UsersRepository {
   }
 
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
-    const user: User | null = await this.usersRepository.findOne({
-      where: { id, isDeleted: false },
+    const user: Omit<User, 'password'> | null = await this.usersRepository.findOne({
+      where: { id, isDeleted: false, isBlocked: false },
       select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
     });
     return user;
+  }
+
+  async deleteUser(id: string): Promise<{message: string}> {
+    await this.usersRepository.update(id, {
+      isDeleted: true
+    });
+
+    return {
+      message: 'User deleted successfully'
+    };
   }
 }
