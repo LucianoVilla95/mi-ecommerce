@@ -10,6 +10,7 @@ import { JwtPayload } from './interfaces/jwtPayload.interface';
 import { UsersQueryDto } from './dtos/usersQueryDto.dto';
 import { PaginationResult } from './interfaces/paginationMeta.interface';
 import { UserRole } from './enums/userRole.enum';
+import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
 
 @Injectable()
 export class UsersService {
@@ -51,8 +52,7 @@ export class UsersService {
         sub: dbUser.id,
         email: dbUser.email,
         role: dbUser.role,
-        isBlocked: dbUser.isBlocked,
-        isDeleted: dbUser.isDeleted
+        isBlocked: dbUser.isBlocked
       }
 
       const token: string = await this.jwtService.sign(userPayload); 
@@ -115,6 +115,15 @@ export class UsersService {
     return user;
   }
 
+  async updateUser(id: string, {name, email, password, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
+
+    const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return await this.usersRepository.updateUser(id, {name, email, password, phone, country, address, city, role});
+  }
+
   async deleteUser(id: string): Promise<{message: string}> {
 
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
@@ -122,8 +131,5 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     return await this.usersRepository.deleteUser(id);
-
   }
-
-
 }

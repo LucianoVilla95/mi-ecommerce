@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './users.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UserRole } from './enums/userRole.enum';
+import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -33,10 +34,18 @@ export class UsersRepository {
 
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.findOne({
-      where: { id, isDeleted: false, isBlocked: false },
+      where: { id, isDeleted: false },
       select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
     });
     return user;
+  }
+
+  async updateUser(id: string, {name, email, password, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
+    await this.usersRepository.update(id, {name, email, password, phone, country, address, city, role});
+
+    return {
+      message: 'User updated successfully'
+    }
   }
 
   async deleteUser(id: string): Promise<{message: string}> {

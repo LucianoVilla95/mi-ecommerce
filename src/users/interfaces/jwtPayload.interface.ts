@@ -3,5 +3,4 @@ export interface JwtPayload {
   email: string;
   role: string;
   isBlocked: boolean;
-  isDeleted: boolean
 }
