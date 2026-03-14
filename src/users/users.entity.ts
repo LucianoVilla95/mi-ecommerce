@@ -37,9 +37,9 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ default: false })
+  @Column({name: 'is_blocked' ,default: false })
   isBlocked: boolean;
 
-  @Column({ default: false })
+  @Column({name: 'is_deleted' ,default: false })
   isDeleted: boolean;
 }
