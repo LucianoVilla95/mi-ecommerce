@@ -15,4 +15,9 @@ export class CategoriesRepository {
     const category: Category = await this.categoriesRepository.create({name: formattedName, slug});
     return await this.categoriesRepository.save(category);
   }
+
+  async getCategories(): Promise<Category[]> {
+    const categories: Category[] = await this.categoriesRepository.find();
+    return categories;
+  }
 }

@@ -32,4 +32,8 @@ export class CategoriesService {
       throw new InternalServerErrorException('Error creating category');
     }
   }
+
+  async getCategories(): Promise<Category[]> {
+    return await this.categoriesRepository.getCategories();
+  }
 }
