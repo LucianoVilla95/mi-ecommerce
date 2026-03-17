@@ -3,7 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../users/users.service';
-import { JwtPayload } from '../users/interfaces/jwtPayload.interface'; 
+import { JwtPayload } from '../users/interfaces/jwtPayload.interface';
+import { User } from 'src/users/users.entity'; 
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -16,19 +17,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtPayload) {
-    const user = await this.usersService.getUserById(payload.sub);
-    
-    // Usuario eliminado
-    if (!user) {
-      throw new UnauthorizedException('User no longer exists');
-    }
+  async validate(payload: JwtPayload): Promise<JwtPayload> {
+    try {
+      const user: Omit<User, 'password'> = await this.usersService.getUserById(payload.sub);
 
-    // Usuario bloqueado
-    if (user.isBlocked) {
-      throw new UnauthorizedException('User is blocked');
+      if (user.isBlocked) throw new UnauthorizedException('User is blocked');
+
+      return payload;
+
+    } catch (error) {
+
+      throw new UnauthorizedException();
     }
-    
-    return payload;
   }
 }
