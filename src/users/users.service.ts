@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException, HttpException} from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
@@ -28,11 +28,12 @@ export class UsersService {
 
       if (!hashedPassword) throw new BadRequestException('Password could not be hashed');
 
-      return await this.usersRepository.signUp({name, email, password: hashedPassword, phone, country, address, city, role})
+      return await this.usersRepository.signUp({name, email, password: hashedPassword, phone, country, address, city, role});
 
     } catch (error) {
+      console.log(error);
 
-      if (error instanceof ConflictException || error instanceof BadRequestException) throw error;
+      if (error instanceof HttpException) throw error;
 
       throw new InternalServerErrorException('Error creating user');
     }
@@ -42,9 +43,9 @@ export class UsersService {
     try {
       const dbUser: User | null = await this.usersRepository.getUserByEmail(email);
 
-      if (!dbUser) throw new UnauthorizedException('Invalid credentials')
+      if (!dbUser) throw new UnauthorizedException('Invalid credentials');
 
-      const isPasswordValid: boolean = await bcrypt.compare(password, dbUser.password)
+      const isPasswordValid: boolean = await bcrypt.compare(password, dbUser.password);
 
       if(!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
 
@@ -55,15 +56,14 @@ export class UsersService {
         isBlocked: dbUser.isBlocked
       }
 
-      const token: string = await this.jwtService.sign(userPayload); 
+      const token: string = this.jwtService.sign(userPayload); 
 
-      const {password: userPassword, ...userWithoutPassword} = dbUser;
-
-      return {user: userWithoutPassword, access_token: token};
+      return {user: {id: dbUser.id, email: dbUser.email, role: dbUser.role }, access_token: token};
 
     } catch (error) {
+      console.log(error);
 
-      if (error instanceof UnauthorizedException) throw error;
+      if (error instanceof HttpException) throw error;
 
       throw new InternalServerErrorException('Login error');
     }   
@@ -103,11 +103,12 @@ export class UsersService {
 
     } catch (error) {
       console.error('Error getting users:', error);
+      
       throw new Error('Could not get users at this time');
     }
   }
 
-  async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
+  async getUserById(id: string): Promise<Omit<User, 'password'>> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
     
     if (!user) throw new NotFoundException(`User with ${id} not found`);

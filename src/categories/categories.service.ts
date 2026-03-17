@@ -31,7 +31,7 @@ export class CategoriesService {
     return await this.categoriesRepository.getCategories();
   }
 
-  async getCategoryById(id: string): Promise<Category | null> {
+  async getCategoryById(id: string): Promise<Category> {
     const category: Category | null = await this.categoriesRepository.getCategoryById(id);
 
     if (!category) throw new NotFoundException('Category not found');

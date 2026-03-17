@@ -10,8 +10,8 @@ import type { JwtPayload } from './interfaces/jwtPayload.interface';
 import { Roles } from '../decorators/rolesUser.decorator';
 import { RolesGuard } from '../guards/roles.guard';
 import { UsersQueryDto } from './dtos/usersQueryDto.dto';
-import { UserRole } from './enums/userRole.enum';
 import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
+import { PaginationResult } from './interfaces/paginationMeta.interface';
 
 @Controller('users')
 export class UsersController {
@@ -30,13 +30,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
-  async getUsers(@Query() query: UsersQueryDto) {
+  async getUsers(@Query() query: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password'>>> {
     return this.usersService.getUsers(query);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@CurrentUser() user: JwtPayload): Promise<Omit<User, 'password'>| null> {
+  async getProfile(@CurrentUser() user: JwtPayload): Promise<Omit<User, 'password'>> {
     return await this.usersService.getUserById(user.sub);
   }
 
