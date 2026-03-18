@@ -12,8 +12,19 @@ export class ProductsRepository {
     return await this.productsRepository.findOne({ where: {name} })
   }
 
-  async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, id: string | undefined): Promise<Product> {
-    const product: Product = await this.productsRepository.create({name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, id});
+  async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, id: string): Promise<Product> {
+    const product: Product = await this.productsRepository.create({name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, category: {id}});
     return await this.productsRepository.save(product);
+  }
+  
+  async getProducts(pageSize: number, skip: number): Promise<[Product[], number]> {
+    const [products, total]: [Product[], number] = await this.productsRepository.findAndCount({
+      skip: skip,
+      take: pageSize,
+      where: { isActive: true },
+      relations: ['category']
+    });
+
+    return [products, total];
   }
 }

@@ -7,6 +7,8 @@ import { ProductsBodyDto } from './dtos/productsBodyDto.dto';
 import { Product } from './products.entity';
 import slugify from 'slugify';
 import { UploadApiResponse } from 'cloudinary';
+import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface';
+import { ProductsQueryDto } from './dtos/productsQueryDto.dto';
 
 @Injectable()
 export class ProductsService {
@@ -30,7 +32,7 @@ export class ProductsService {
 
       const uploadedImage: UploadApiResponse = await this.cloudinaryService.uploadImage(file);
 
-      return await this.productsRepository.createProduct(name, description, price, stock, uploadedImage.secure_url, uploadedImage.public_id, slug, category?.id);
+      return await this.productsRepository.createProduct(name, description, price, stock, uploadedImage.secure_url, uploadedImage.public_id, slug, category.id);
 
     } catch (error) {
       console.log(error);
@@ -38,6 +40,44 @@ export class ProductsService {
       if (error instanceof HttpException) throw error;
 
       throw new InternalServerErrorException('Error creating user');
+    }
+  }
+
+  async getProducts({page, limit}: ProductsQueryDto): Promise<PaginationResult<Product>> {
+    const currentPage: number = page && page > 0 ? page : 1;
+    const pageSize: number = limit && limit > 0 ? Math.min(limit, 100) : 10;
+    const skip: number = (currentPage - 1) * pageSize;
+
+    try {
+      const result: [Product[], number] = await this.productsRepository.getProducts(pageSize, skip);
+
+      const data: Product[] = result[0].map((product: Product): Product => {
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          stock: product.stock,
+          imgUrl: product.imgUrl,
+          imgPublicId: product.imgPublicId,
+          slug: product.slug,
+          isActive: product.isActive,
+          category: product.category
+        }
+      });
+
+      return {
+        data: data,
+        meta: {
+          total: result[1],
+          currentPage,
+          lastPage: Math.ceil(result[1] / pageSize)
+        }
+      }
+    } catch (error) {
+      console.error('Error getting products:', error);
+
+      throw new Error('Could not get products at this time');
     }
   }
 }
