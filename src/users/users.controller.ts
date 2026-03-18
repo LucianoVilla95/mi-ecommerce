@@ -1,4 +1,4 @@
-import { Controller, Post,Get, Patch, Delete, Body, UseGuards, Query, Param } from '@nestjs/common';
+import { Controller, Post,Get, Patch, Delete, Body, UseGuards, Query, Param, ParseUUIDPipe } from '@nestjs/common';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
@@ -43,14 +43,14 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch(':id')
-  async updateUser(@Param('id') id:string, @Body() usersUpdateDto: UsersUpdateDto): Promise<{message: string}> {
+  async updateUser(@Param('id', new ParseUUIDPipe({ version: '4' })) id:string, @Body() usersUpdateDto: UsersUpdateDto): Promise<{message: string}> {
     return await this.usersService.updateUser(id, usersUpdateDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
-  async deleteUser (@Param('id') id: string): Promise<{message: string}> {
+  async deleteUser (@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<{message: string}> {
     return await this.usersService.deleteUser(id);
   }
 }
