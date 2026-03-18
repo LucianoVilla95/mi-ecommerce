@@ -77,7 +77,7 @@ export class UsersService {
     try{
       const result: [User[], number] = await this.usersRepository.getUsers(pageSize, skip);
 
-      const data: Omit<User, 'password'>[] = result[0].map(user => {
+      const data: Omit<User, 'password'>[] = result[0].map((user: User): Omit<User, 'password'> => {
         return {
           id: user.id,
           name: user.name,
