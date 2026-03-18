@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { v4 as uuid} from 'uuid';
+import { Category } from 'src/categories/categories.entity';
 
 @Entity({
   name: 'products'
@@ -27,6 +28,16 @@ export class Product {
   @Column({name: 'img_url', default: 'https://emprendepyme.net/wp-content/uploads/2023/03/cualidades-producto.jpg'})
   imgUrl: string;
 
+  @Column({name: 'img_public_id'})
+  imgPublicId: string;
+
+  @Column()
+  slug: string;
+
   @Column({name: 'is_active', default: true})
   isActive: boolean;
+
+  @ManyToOne(() => Category, category => category.products)
+  @JoinColumn({name: 'category_id'})
+  category: Category;
 }
