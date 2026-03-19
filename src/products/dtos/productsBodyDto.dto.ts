@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, Min, Max, IsUUID, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, Min, Max, IsUUID, IsInt, IsOptional, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ProductsBodyDto {
@@ -23,9 +23,14 @@ export class ProductsBodyDto {
   @Min(1)
   @Type(() => Number)
   stock: number;
+  
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @IsNotEmpty()
   @IsUUID('4')
   @IsString()
   categoryId: string;
+
 }

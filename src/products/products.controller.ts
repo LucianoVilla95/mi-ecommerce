@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Get, Query, UseGuards, Patch, Param, ParseUUIDPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsBodyDto } from './dtos/productsBodyDto.dto';
 import { ProductsService } from './products.service';
@@ -8,6 +8,7 @@ import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface'
 import { Roles } from 'src/decorators/rolesUser.decorator';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -15,8 +16,8 @@ export class ProductsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @Post()
   async createProduct(@Body() body: ProductsBodyDto, @UploadedFile(new ParseFilePipe({
     validators: [
       new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
@@ -29,5 +30,18 @@ export class ProductsController {
   @Get()
   async getProducts(@Query() query: ProductsQueryDto): Promise<PaginationResult<Product>> {
     return await this.productsService.getProducts(query);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @UseInterceptors(FileInterceptor('file'))
+  @Patch(':id')
+  async updateProduct(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: ProductsUpdateDto, @UploadedFile(new ParseFilePipe({
+    validators: [
+      new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
+      new FileTypeValidator({fileType: /(jpg|jpeg|png|webp)$/})
+    ]
+  })) file?: Express.Multer.File): Promise<{message: string}> {
+    return await this.productsService.updateProduct(id, body, file);
   }
 }

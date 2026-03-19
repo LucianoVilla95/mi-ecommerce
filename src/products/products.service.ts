@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, ConflictException, HttpException, BadRequestException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/categories.entity';
@@ -9,6 +9,7 @@ import slugify from 'slugify';
 import { UploadApiResponse } from 'cloudinary';
 import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface';
 import { ProductsQueryDto } from './dtos/productsQueryDto.dto';
+import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
 
 @Injectable()
 export class ProductsService {
@@ -32,7 +33,7 @@ export class ProductsService {
 
       const uploadedImage: UploadApiResponse = await this.cloudinaryService.uploadImage(file);
 
-      return await this.productsRepository.createProduct(name, description, price, stock, uploadedImage.secure_url, uploadedImage.public_id, slug, category.id);
+      return await this.productsRepository.createProduct(name, description, price, stock, uploadedImage.secure_url, uploadedImage.public_id, slug, category);
 
     } catch (error) {
       console.log(error);
@@ -79,5 +80,36 @@ export class ProductsService {
 
       throw new Error('Could not get products at this time');
     }
+  }
+
+  async updateProduct(id: string, {name, description, price, stock, categoryId, isActive}: ProductsUpdateDto, file?: Express.Multer.File): Promise<{message: string}> {
+    const product: Product | null = await this.productsRepository.getProductById(id);
+    if (!product) throw new NotFoundException('Product not found');
+
+    if (name) {
+      const productExists: Product | null = await this.productsRepository.getProductByName(name);
+      if (productExists && productExists.id !== id) throw new ConflictException('Product already exists');
+    }
+
+    let category: Category | undefined;
+    if (categoryId) {
+      category = await this.categoriesService.getCategoryById(categoryId);
+    }
+
+    let uploadedImage: UploadApiResponse | undefined;
+    if (file) {
+      uploadedImage = await this.cloudinaryService.uploadImage(file);
+      if (product.imgPublicId) await this.cloudinaryService.deleteImage(product.imgPublicId);
+    }
+
+    let slug: string | undefined;
+    if (name) {
+      slug = slugify(name, {
+        lower: true,
+        strict: true
+      });
+    }
+
+    return await this.productsRepository.updateProduct(id, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
   }
 }

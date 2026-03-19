@@ -12,8 +12,8 @@ export class ProductsRepository {
     return await this.productsRepository.findOne({ where: {name} })
   }
 
-  async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, id: string): Promise<Product> {
-    const product: Product = await this.productsRepository.create({name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, category: {id}});
+  async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, category: Category): Promise<Product> {
+    const product: Product = await this.productsRepository.create({name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, category});
     return await this.productsRepository.save(product);
   }
   
@@ -26,5 +26,22 @@ export class ProductsRepository {
     });
 
     return [products, total];
+  }
+
+  async getProductById (id: string): Promise<Product | null> {
+    const product: Product | null = await this.productsRepository.findOne({
+      where: {id, isActive: true},
+      relations: ['category']
+    });
+
+    return product;
+  }
+
+  async updateProduct(id: string, name?: string, description?: string, price?: number, stock?: number, secure_url?: string, public_id?: string, slug?: string, isActive?: boolean, category?: Category): Promise<{message: string}> {
+    await this.productsRepository.update(id, {name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, isActive, category});
+  
+    return {
+      message: 'Product updated successfully'
+    }
   }
 }
