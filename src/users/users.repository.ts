@@ -40,8 +40,8 @@ export class UsersRepository {
     return user;
   }
 
-  async updateUser(id: string, {name, email, password, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
-    await this.usersRepository.update(id, {name, email, password, phone, country, address, city, role});
+  async updateUser(id: string, {name, email, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
+    await this.usersRepository.update(id, {name, email, phone, country, address, city, role});
 
     return {
       message: 'User updated successfully'

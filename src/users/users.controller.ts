@@ -40,11 +40,10 @@ export class UsersController {
     return await this.usersService.getUserById(user.sub);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async updateUser(@Param('id', new ParseUUIDPipe({ version: '4' })) id:string, @Body() usersUpdateDto: UsersUpdateDto): Promise<{message: string}> {
-    return await this.usersService.updateUser(id, usersUpdateDto);
+  async updateUser(@Param('id', new ParseUUIDPipe({ version: '4' })) id:string, @Body() body: UsersUpdateDto): Promise<{message: string}> {
+    return await this.usersService.updateUser(id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

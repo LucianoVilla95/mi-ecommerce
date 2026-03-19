@@ -111,18 +111,21 @@ export class UsersService {
   async getUserById(id: string): Promise<Omit<User, 'password'>> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
     
-    if (!user) throw new NotFoundException(`User with ${id} not found`);
+    if (!user) throw new NotFoundException(`User not found`);
 
     return user;
   }
 
-  async updateUser(id: string, {name, email, password, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
-
+  async updateUser(id: string, {name, email, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
-
     if (!user) throw new NotFoundException('User not found');
 
-    return await this.usersRepository.updateUser(id, {name, email, password, phone, country, address, city, role});
+    if (email) {
+      const userExists: User | null = await this.usersRepository.getUserByEmail(email);
+      if (userExists && userExists.id !== id) throw new ConflictException('Email already registered');
+    }
+
+    return await this.usersRepository.updateUser(id, {name, email, phone, country, address, city, role});
   }
 
   async deleteUser(id: string): Promise<{message: string}> {
