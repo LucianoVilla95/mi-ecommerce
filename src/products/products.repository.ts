@@ -44,4 +44,14 @@ export class ProductsRepository {
       message: 'Product updated successfully'
     }
   }
+
+  async deleteProduct(id: string): Promise<{message: string}> {
+    await this.productsRepository.update(id, {
+      isActive: false
+    });
+
+    return {
+      message: 'Product deleted successfully'
+    }
+  }
 }

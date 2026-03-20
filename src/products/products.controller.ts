@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Get, Query, UseGuards, Patch, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post, Body, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Get, Query, UseGuards, Patch, Param, ParseUUIDPipe, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsBodyDto } from './dtos/productsBodyDto.dto';
 import { ProductsService } from './products.service';
@@ -43,5 +43,12 @@ export class ProductsController {
     ]
   })) file?: Express.Multer.File): Promise<{message: string}> {
     return await this.productsService.updateProduct(id, body, file);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Delete(':id')
+  async deleteProduct(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<{message: string}> {
+    return await this.productsService.deleteProduct(id);
   }
 }

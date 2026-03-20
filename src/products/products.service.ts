@@ -112,4 +112,13 @@ export class ProductsService {
 
     return await this.productsRepository.updateProduct(id, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
   }
+
+  async deleteProduct(id: string): Promise<{message: string}> {
+    const product: Product | null = await this.productsRepository.getProductById(id);
+    if (!product) throw new NotFoundException('Product not found');
+
+    if (product.imgPublicId) await this.cloudinaryService.deleteImage(product.imgPublicId);
+
+    return await this.productsRepository.deleteProduct(id);
+  }
 }
