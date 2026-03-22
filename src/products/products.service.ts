@@ -83,10 +83,17 @@ export class ProductsService {
     }
   }
 
-  async updateProduct(id: string, {name, description, price, stock, categoryId, isActive}: ProductsUpdateDto, file?: Express.Multer.File): Promise<{message: string}> {
+  async getProductById(id: string): Promise<Product> {
     const product: Product | null = await this.productsRepository.getProductById(id);
+    
     if (!product) throw new NotFoundException('Product not found');
 
+    return product;
+  }
+
+  async updateProduct(id: string, {name, description, price, stock, categoryId, isActive}: ProductsUpdateDto, file?: Express.Multer.File): Promise<{message: string}> {
+    const product: Product = await this.getProductById(id);
+    
     if (name) {
       const productExists: Product | null = await this.productsRepository.getProductByName(name);
       if (productExists && productExists.id !== id) throw new ConflictException('Product already exists');
