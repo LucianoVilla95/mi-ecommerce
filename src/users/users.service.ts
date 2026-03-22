@@ -105,7 +105,7 @@ export class UsersService {
     } catch (error) {
       console.error('Error getting users:', error);
       
-      throw new Error('Could not get users at this time');
+      throw new InternalServerErrorException('Could not get users at this time');
     }
   }
 
