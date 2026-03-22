@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UserRole } from '../users/enums/userRole.enum';
+import { Order } from 'src/orders/orders.entity';
 
 @Entity({
   name: 'users'
@@ -37,9 +38,12 @@ export class User {
   })
   role: UserRole;
 
-  @Column({name: 'is_blocked' ,default: false })
+  @Column({name: 'is_blocked' ,default: false})
   isBlocked: boolean;
 
-  @Column({name: 'is_deleted' ,default: false })
+  @Column({name: 'is_deleted' ,default: false})
   isDeleted: boolean;
+
+  @OneToMany(() => Order, order => order.user)
+  orders: Order[];
 }
