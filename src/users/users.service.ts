@@ -88,7 +88,8 @@ export class UsersService {
           city: user.city,
           role: user.role,
           isBlocked: user.isBlocked,
-          isDeleted: user.isDeleted
+          isDeleted: user.isDeleted,
+          orders: user.orders
         }
       });
       

@@ -63,7 +63,8 @@ export class ProductsService {
           imgPublicId: product.imgPublicId,
           slug: product.slug,
           isActive: product.isActive,
-          category: product.category
+          category: product.category,
+          orderDetails: product.orderDetails
         }
       });
 

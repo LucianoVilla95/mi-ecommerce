@@ -9,7 +9,7 @@ export class ProductsRepository {
   constructor (@InjectRepository(Product) private readonly productsRepository: Repository<Product>) {}
 
   async getProductByName (name: string): Promise<Product | null> {
-    return await this.productsRepository.findOne({ where: {name} })
+    return await this.productsRepository.findOne({ where: {name}, relations: ['category', 'orderDetails'] })
   }
 
   async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, category: Category): Promise<Product> {
@@ -22,7 +22,7 @@ export class ProductsRepository {
       skip: skip,
       take: pageSize,
       where: { isActive: true },
-      relations: ['category']
+      relations: ['category', 'orderDetails']
     });
 
     return [products, total];
@@ -31,7 +31,7 @@ export class ProductsRepository {
   async getProductById (id: string): Promise<Product | null> {
     const product: Product | null = await this.productsRepository.findOne({
       where: {id, isActive: true},
-      relations: ['category']
+      relations: ['category', 'orderDetails']
     });
 
     return product;

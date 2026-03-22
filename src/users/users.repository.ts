@@ -11,7 +11,7 @@ export class UsersRepository {
   constructor (@InjectRepository(User) private readonly usersRepository: Repository<User>) {}
 
   async getUserByEmail(email: string): Promise <User | null> {
-    return await this.usersRepository.findOne({ where: { email, isDeleted: false } });
+    return await this.usersRepository.findOne({ where: { email, isDeleted: false }, relations: ['orders'] });
   }
 
   async signUp({name, email, password, phone, country, address, city, role = UserRole.USER}: UsersBodyDto): Promise<Omit<User, 'password'>> {
@@ -26,7 +26,8 @@ export class UsersRepository {
       skip: skip,
       take: pageSize,
       where: { isDeleted: false, role: UserRole.USER },
-      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
+      relations: ['orders'],
+      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted', 'orders']
     });
 
     return [users, total];
@@ -35,7 +36,8 @@ export class UsersRepository {
   async getUserById(id: string): Promise<Omit<User, 'password'>| null> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.findOne({
       where: { id, isDeleted: false },
-      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted']
+      relations: ['orders'],
+      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted', 'orders']
     });
     return user;
   }
