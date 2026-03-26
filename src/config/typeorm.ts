@@ -19,4 +19,4 @@ const config: DataSourceOptions = {
 
 export default registerAs('typeorm', () => config);
 
-export const AppDataSource = new DataSource(config);
+export const AppDataSource: DataSource = new DataSource(config);
