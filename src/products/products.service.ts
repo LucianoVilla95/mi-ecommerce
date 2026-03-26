@@ -10,6 +10,7 @@ import { UploadApiResponse } from 'cloudinary';
 import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface';
 import { ProductsQueryDto } from './dtos/productsQueryDto.dto';
 import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
@@ -83,8 +84,8 @@ export class ProductsService {
     }
   }
 
-  async getProductById(id: string): Promise<Product> {
-    const product: Product | null = await this.productsRepository.getProductById(id);
+  async getProductById(id: string, manager?: EntityManager): Promise<Product> {
+    const product: Product | null = await this.productsRepository.getProductById(id, manager);
     
     if (!product) throw new NotFoundException('Product not found');
 
@@ -118,7 +119,7 @@ export class ProductsService {
       });
     }
 
-    return await this.productsRepository.updateProduct(id, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
+    return await this.productsRepository.updateProduct(product, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
   }
 
   async deleteProduct(id: string): Promise<{message: string}> {
@@ -127,6 +128,6 @@ export class ProductsService {
 
     if (product.imgPublicId) await this.cloudinaryService.deleteImage(product.imgPublicId);
 
-    return await this.productsRepository.deleteProduct(id);
+    return await this.productsRepository.deleteProduct(product);
   }
 }

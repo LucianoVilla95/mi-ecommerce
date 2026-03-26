@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './products.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Category } from 'src/categories/categories.entity';
 
 @Injectable()
@@ -28,27 +28,30 @@ export class ProductsRepository {
     return [products, total];
   }
 
-  async getProductById (id: string): Promise<Product | null> {
-    const product: Product | null = await this.productsRepository.findOne({
-      where: {id, isActive: true},
-      relations: ['category', 'orderDetails']
-    });
+  async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
+    const product: Repository<Product> = manager ? manager.getRepository(Product) : this.productsRepository;
 
-    return product;
+    return await product
+    .createQueryBuilder('product')
+    .innerJoinAndSelect('product.category', 'category')
+    .setLock('pessimistic_write')
+    .where('product.id = :id', { id })
+    .andWhere('product.isActive = :isActive', { isActive: 'true' })
+    .getOne();
   }
 
-  async updateProduct(id: string, name?: string, description?: string, price?: number, stock?: number, secure_url?: string, public_id?: string, slug?: string, isActive?: boolean, category?: Category): Promise<{message: string}> {
-    await this.productsRepository.update(id, {name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, isActive, category});
-  
+  async updateProduct(product: Product, name?: string, description?: string, price?: number, stock?: number, secure_url?: string, public_id?: string, slug?: string, isActive?: boolean, category?: Category): Promise<{message: string}> {
+    Object.assign(product, {name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, isActive, category});
+    await this.productsRepository.save(product);
+
     return {
       message: 'Product updated successfully'
     }
   }
 
-  async deleteProduct(id: string): Promise<{message: string}> {
-    await this.productsRepository.update(id, {
-      isActive: false
-    });
+  async deleteProduct(product: Product): Promise<{message: string}> {
+    product.isActive = false;
+    await this.productsRepository.save(product);
 
     return {
       message: 'Product deleted successfully'
