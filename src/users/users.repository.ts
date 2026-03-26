@@ -42,19 +42,19 @@ export class UsersRepository {
     return user;
   }
 
-  async updateUser(id: string, {name, email, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
-    await this.usersRepository.update(id, {name, email, phone, country, address, city, role});
+  async updateUser(user: Omit<User, 'password'>, {name, email, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
+    Object.assign(user, {name, email, phone, country, address, city, role})
+    await this.usersRepository.save(user);
 
     return {
       message: 'User updated successfully'
     }
   }
 
-  async deleteUser(id: string): Promise<{message: string}> {
-    await this.usersRepository.update(id, {
-      isDeleted: true
-    });
-
+  async deleteUser(user: Omit<User, 'password'>): Promise<{message: string}> {
+    user.isDeleted = true;
+    await this.usersRepository.save(user);
+    
     return {
       message: 'User deleted successfully'
     };

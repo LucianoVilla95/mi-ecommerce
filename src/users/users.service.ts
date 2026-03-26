@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException, HttpException} from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, InternalServerErrorException, UnauthorizedException, NotFoundException, ForbiddenException, HttpException} from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
@@ -126,15 +126,16 @@ export class UsersService {
       if (userExists && userExists.id !== id) throw new ConflictException('Email already registered');
     }
 
-    return await this.usersRepository.updateUser(id, {name, email, phone, country, address, city, role});
+    return await this.usersRepository.updateUser(user, {name, email, phone, country, address, city, role});
   }
 
   async deleteUser(id: string): Promise<{message: string}> {
 
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
-
     if (!user) throw new NotFoundException('User not found');
 
-    return await this.usersRepository.deleteUser(id);
+    if (user.role === UserRole.ADMIN) throw new ForbiddenException('Cannot delete admin users');
+
+    return await this.usersRepository.deleteUser(user);
   }
 }
