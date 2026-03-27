@@ -1,8 +1,9 @@
-import { User } from 'src/users/users.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import { User } from 'src/users/users.entity';
 import { OrderDetail } from './orderDetails.entity';
 
+@Index(['user', 'isActive'], { unique: true })
 @Entity({
   name: 'orders'
 })
@@ -17,7 +18,7 @@ export class Order {
   @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)
   details: OrderDetail[];
 
-  @Column()
+  @CreateDateColumn()
   date: Date;
 
   @Column({name: 'is_active', default: true})

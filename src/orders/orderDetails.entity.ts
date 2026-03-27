@@ -1,13 +1,14 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { Order } from './orders.entity';
 import { Product } from 'src/products/products.entity';
 
+@Index(['order', 'product'], { unique: true })
 @Entity({
   name: 'order_details'
 })
 export class OrderDetail {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string = uuid();
 
   @ManyToOne(() => Order, order => order.details)
