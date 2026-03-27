@@ -1,6 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { OrdersRepository } from './orders.repository';
+import { Order } from './orders.entity';
+import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/users.entity';
+import { AddProductDto } from './dtos/addProductDto.dto';
+import { ProductsService } from 'src/products/products.service';
+import { Product } from 'src/products/products.entity';
+import { JwtPayload } from 'src/users/interfaces/jwtPayload.interface';
+import { DataSource, EntityManager } from 'typeorm';
+import { OrderDetail } from './orderDetails.entity';
 
-Injectable()
+@Injectable()
 export class OrdersService {
-  constructor () {}
+  constructor (private readonly ordersRepository: OrdersRepository,
+    private readonly usersService: UsersService,
+    private readonly productsService: ProductsService,
+    private readonly dataSource: DataSource
+  ) {}
+
+  async getOrCreateOrder(sub: string): Promise<Order> {
+      const user: Omit<User, 'password'> = await this.usersService.getUserById(sub);
+
+      let order: Order | null = await this.ordersRepository.getOrderByUser(user);
+      if (!order) order = await this.ordersRepository.createOrder(user);
+
+      return order;
+  }
+
+  async addProduct({sub}: JwtPayload, {productId, quantity}: AddProductDto): Promise<{message: string}> {
+      const order: Order = await this.getOrCreateOrder(sub);
+      const product: Product = await this.productsService.getProductById(productId);
+
+      if (product.stock < quantity) throw new BadRequestException('Insufficient stock');
+
+      let orderDetailExisting: OrderDetail | null = await this.ordersRepository.getOrderDetail(order, product);
+
+      if (orderDetailExisting) {
+        orderDetailExisting.quantity += quantity;
+        await this.ordersRepository.updateOrderDetail(orderDetailExisting);
+      } else {
+        await this.ordersRepository.createOrderDetail(order, product, quantity, product.price);
+      }
+      
+      return {
+        message: 'Product added successfully!'
+      }
+  }
 }
