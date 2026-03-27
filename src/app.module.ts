@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { CategoriesModule } from './categories/categories.module';
       signOptions: { expiresIn: '1h' },
       secret: process.env.JWT_SECRET
     }),
-  UsersModule, ProductsModule, CategoriesModule],
+  UsersModule, ProductsModule, CategoriesModule, OrdersModule],
   controllers: [],
   providers: [JwtStrategy],
 })
