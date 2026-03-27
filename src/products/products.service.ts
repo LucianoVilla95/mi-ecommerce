@@ -123,7 +123,7 @@ export class ProductsService {
   }
 
   async deleteProduct(id: string): Promise<{message: string}> {
-    const product: Product | null = await this.productsRepository.getProductById(id);
+    const product: Product = await this.getProductById(id);
     if (!product) throw new NotFoundException('Product not found');
 
     if (product.imgPublicId) await this.cloudinaryService.deleteImage(product.imgPublicId);

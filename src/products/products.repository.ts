@@ -29,15 +29,14 @@ export class ProductsRepository {
   }
 
   async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
-    const product: Repository<Product> = manager ? manager.getRepository(Product) : this.productsRepository;
-
-    return await product
+    return manager ?
+    await manager?.getRepository(Product)
     .createQueryBuilder('product')
-    .innerJoinAndSelect('product.category', 'category')
     .setLock('pessimistic_write')
     .where('product.id = :id', { id })
     .andWhere('product.isActive = :isActive', { isActive: 'true' })
-    .getOne();
+    .getOne()
+    : await this.productsRepository.findOne({ where: {id}, relations: ['category', 'orderDetails'] });
   }
 
   async updateProduct(product: Product, name?: string, description?: string, price?: number, stock?: number, secure_url?: string, public_id?: string, slug?: string, isActive?: boolean, category?: Category): Promise<{message: string}> {
