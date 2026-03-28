@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './orders.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, DeleteResult } from 'typeorm';
 import { User } from 'src/users/users.entity';
 import { OrderDetail } from './orderDetails.entity';
 import { Product } from 'src/products/products.entity';
@@ -42,5 +42,12 @@ export class OrdersRepository {
     return {
       message: 'Product added successfully!'
     }
+  }
+
+  async deleteOrderDetail(order: Order, id: string): Promise<DeleteResult> {
+    return await this.orderDetailsRepository.delete({
+      order: {id: order.id},
+      product: {id: id}
+    });
   }
 }
