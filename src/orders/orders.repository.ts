@@ -19,7 +19,7 @@ export class OrdersRepository {
     .where('order.user.id = :userId', { userId: user.id })
     .andWhere('order.isActive = :isActive', { isActive: true })
     .getOne()
-    : await this.ordersRepository.findOne({ where: {user: {id: user.id}, isActive: true}, relations: ['details']})
+    : await this.ordersRepository.findOne({ where: {user: {id: user.id}, isActive: true}, relations: ['user', 'details', 'details.product']})
   }
 
   async createOrder(user: Omit<User, 'password'>): Promise<Order> {
@@ -33,7 +33,7 @@ export class OrdersRepository {
   }
 
   async getOrderDetail(order: Order, product: Product): Promise<OrderDetail | null> {
-    return await this.orderDetailsRepository.findOne({ where: {order: {id: order.id}, product: {id: product.id}}});
+    return await this.orderDetailsRepository.findOne({ where: {order: {id: order.id}, product: {id: product.id}}, relations: ['order', 'product']});
   }
 
   async updateOrderDetail(orderDetailExisting: OrderDetail): Promise<{message: string}> {
