@@ -21,24 +21,27 @@ export class OrdersService {
 
   async getOrCreateOrder(sub: string): Promise<Order> {
       const user: Omit<User, 'password'> = await this.usersService.getUserById(sub);
-
+      
       let order: Order | null = await this.ordersRepository.getOrderByUser(user);
+      
       if (!order) order = await this.ordersRepository.createOrder(user);
-
+      
       return order;
   }
 
   async addProduct({sub}: JwtPayload, {productId, quantity}: AddProductsDto): Promise<{message: string}> {
       const order: Order = await this.getOrCreateOrder(sub);
+      
       const product: Product = await this.productsService.getProductById(productId);
-
+      
       if (product.stock < quantity) throw new BadRequestException('Insufficient stock');
 
       let orderDetailExisting: OrderDetail | null = await this.ordersRepository.getOrderDetail(order, product);
-
+      
       if (orderDetailExisting) {
         orderDetailExisting.quantity += quantity;
         await this.ordersRepository.updateOrderDetail(orderDetailExisting);
+
       } else {
         await this.ordersRepository.createOrderDetail(order, product, quantity, product.price);
       }
@@ -78,4 +81,17 @@ export class OrdersService {
       message: 'Cart updated successfully!'
     }
   }
+
+  async getOrder({sub}: JwtPayload): Promise<Omit<Order, 'user' | 'date' | 'isActive'> & {userId: string, total: number}> {
+  const order: Order = await this.getOrCreateOrder(sub);
+  
+  const total = order.details.reduce((acc, item) => acc + item.price * item.quantity,0);
+
+  return {
+    id: order.id,
+    userId: order.user.id,
+    details: order.details,
+    total,
+  };
+}
 }
