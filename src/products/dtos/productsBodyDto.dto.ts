@@ -4,25 +4,25 @@ import { Type } from 'class-transformer';
 export class ProductsBodyDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description!: string;
 
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber({maxDecimalPlaces: 2})
   @Min(1)
   @Max(99999999.99)
-  price: number;
+  price!: number;
 
   @IsNotEmpty()
   @IsNumber()
   @IsInt()
   @Min(1)
   @Type(() => Number)
-  stock: number;
+  stock!: number;
   
   @IsOptional()
   @IsBoolean()
@@ -31,6 +31,6 @@ export class ProductsBodyDto {
   @IsNotEmpty()
   @IsUUID('4')
   @IsString()
-  categoryId: string;
+  categoryId!: string;
 
 }
