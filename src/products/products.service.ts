@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException, ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
-import { CategoriesService } from 'src/categories/categories.service';
-import { Category } from 'src/categories/categories.entity';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CategoriesService } from '../categories/categories.service';
+import { Category } from '../categories/categories.entity';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { ProductsBodyDto } from './dtos/productsBodyDto.dto';
 import { Product } from './products.entity';
 import slugify from 'slugify';
 import { UploadApiResponse } from 'cloudinary';
-import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface';
+import { PaginationResult } from '../users/interfaces/paginationMeta.interface';
 import { ProductsQueryDto } from './dtos/productsQueryDto.dto';
 import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
 import { EntityManager } from 'typeorm';
@@ -120,6 +120,10 @@ export class ProductsService {
     }
 
     return await this.productsRepository.updateProduct(product, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
+  }
+
+  async updateStock(product: Product, manager?: EntityManager): Promise<{message: string}> {
+    return await this.productsRepository.updateStock(product, manager);
   }
 
   async deleteProduct(id: string): Promise<{message: string}> {
