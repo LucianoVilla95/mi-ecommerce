@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { v4 as uuid} from 'uuid';
-import { Category } from 'src/categories/categories.entity';
-import { OrderDetail } from 'src/orders/orderDetails.entity';
+import { Category } from '../categories/categories.entity';
+import { OrderDetail } from '../orders/orderDetails.entity';
 
 @Entity({
   name: 'products'
@@ -11,37 +11,37 @@ export class Product {
   id: string = uuid();
 
   @Column({length: 100, nullable: false})
-  name: string;
+  name!: string;
 
   @Column('text', {nullable: false})
-  description: string;
+  description!: string;
 
   @Column('decimal', {
     precision: 10,
     scale: 2,
     nullable: false
   })
-  price: number;
+  price!: number;
 
   @Column({nullable: false})
-  stock: number;
+  stock!: number;
 
   @Column({name: 'img_url', default: 'https://emprendepyme.net/wp-content/uploads/2023/03/cualidades-producto.jpg'})
-  imgUrl: string;
+  imgUrl!: string;
 
   @Column({name: 'img_public_id'})
-  imgPublicId: string;
+  imgPublicId!: string;
 
   @Column()
-  slug: string;
+  slug!: string;
 
   @Column({name: 'is_active', default: true})
-  isActive: boolean;
+  isActive!: boolean;
 
   @ManyToOne(() => Category, category => category.products)
   @JoinColumn({name: 'category_id'})
-  category: Category;
+  category!: Category;
 
   @OneToMany(() => OrderDetail, orderDetail => orderDetail.product)
-  orderDetails: OrderDetail[];
+  orderDetails!: OrderDetail[];
 }
