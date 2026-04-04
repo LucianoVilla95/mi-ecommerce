@@ -6,12 +6,12 @@ export class UsersBodyDto {
   @IsNotEmpty()
   @MinLength(3)
   @MaxLength(50)
-  name: string;
+  name!: string;
 
   @IsString()
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -23,30 +23,30 @@ export class UsersBodyDto {
     'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
 }
   )
-  password: string;
+  password!: string;
 
   @IsString()
   @IsOptional()
   @MaxLength(20)
-  phone: string;
+  phone!: string;
     
   @IsString()
   @IsOptional()
   @MinLength(5)
   @MaxLength(50)
-  country: string;
+  country!: string;
 
   @IsString()
   @IsOptional()
   @MinLength(3)
   @MaxLength(80)
-  address: string;
+  address!: string;
 
   @IsString()
   @IsOptional()
   @MinLength(5)
   @MaxLength(50)
-  city: string;
+  city!: string;
 
   @IsOptional()
   @IsEnum(UserRole)
