@@ -5,11 +5,11 @@ export class AddProductsDto {
   @IsString()
   @IsNotEmpty()
   @IsUUID('4')
-  productId: string;
+  productId!: string;
 
   @IsNotEmpty()
   @IsInt()
   @Min(0)
   @Type(() => Number)
-  quantity: number;
+  quantity!: number;
 }
