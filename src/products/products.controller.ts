@@ -4,10 +4,10 @@ import { ProductsBodyDto } from './dtos/productsBodyDto.dto';
 import { ProductsService } from './products.service';
 import { Product } from './products.entity';
 import { ProductsQueryDto } from './dtos/productsQueryDto.dto';
-import { PaginationResult } from 'src/users/interfaces/paginationMeta.interface';
-import { Roles } from 'src/decorators/rolesUser.decorator';
-import { JwtAuthGuard } from 'src/guards/auth.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
+import { PaginationResult } from '../users/interfaces/paginationMeta.interface';
+import { Roles } from '../decorators/rolesUser.decorator';
+import { JwtAuthGuard } from '../guards/auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
 import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
 
 @Controller('products')
