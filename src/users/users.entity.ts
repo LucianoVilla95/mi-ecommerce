@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UserRole } from '../users/enums/userRole.enum';
-import { Order } from 'src/orders/orders.entity';
+import { Order } from '../orders/orders.entity';
 
 @Entity({
   name: 'users'
@@ -11,39 +11,39 @@ export class User {
   id: string = uuid();
 
   @Column({length: 50, nullable: false})
-  name: string;
+  name!: string;
 
   @Column({length: 50, nullable: false, unique: true})
-  email: string;
+  email!: string;
 
   @Column({length: 100, nullable: false})
-  password: string;
+  password!: string;
 
   @Column({length: 20})
-  phone: string;
+  phone!: string;
 
   @Column({length: 50})
-  country: string;
+  country!: string;
 
   @Column()
-  address: string;
+  address!: string;
 
   @Column({length: 50})
-  city: string;
+  city!: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.USER
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Column({name: 'is_blocked' ,default: false})
-  isBlocked: boolean;
+  isBlocked!: boolean;
 
   @Column({name: 'is_deleted' ,default: false})
-  isDeleted: boolean;
+  isDeleted!: boolean;
 
   @OneToMany(() => Order, order => order.user)
-  orders: Order[];
+  orders!: Order[];
 }

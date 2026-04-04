@@ -4,7 +4,7 @@ interface PaginationMeta {
   lastPage: number
 }
 
- export interface PaginationResult<T> {
+export interface PaginationResult<T> {
   data: T[];
   meta: PaginationMeta;
 }
