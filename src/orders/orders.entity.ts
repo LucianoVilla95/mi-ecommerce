@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { v4 as uuid } from 'uuid';
-import { User } from 'src/users/users.entity';
+import { User } from '../users/users.entity';
 import { OrderDetail } from './orderDetails.entity';
 
 @Index(['user', 'isActive'], { unique: true })
@@ -13,14 +13,14 @@ export class Order {
 
   @ManyToOne(() => User, user => user.orders)
   @JoinColumn({name: 'user_id'})
-  user: User;
+  user!: User;
 
   @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)
-  details: OrderDetail[];
+  details!: OrderDetail[];
 
   @CreateDateColumn()
-  date: Date;
+  date!: Date;
 
   @Column({name: 'is_active', default: true})
-  isActive: boolean;
+  isActive!: boolean;
 }
