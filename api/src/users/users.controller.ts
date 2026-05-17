@@ -12,6 +12,8 @@ import { RolesGuard } from '../guards/roles.guard';
 import { UsersQueryDto } from './dtos/usersQueryDto.dto';
 import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
 import { PaginationResult } from './interfaces/paginationMeta.interface';
+import { ForgotPasswordDto } from './dtos/forgotPasswordDto.dto';
+import { ResetPasswordDto } from './dtos/resetPasswordDto.dto';
 
 @Controller('users')
 export class UsersController {
@@ -27,11 +29,21 @@ export class UsersController {
     return await this.usersService.signIn(body);
   }
   
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<{message: string}> {
+    return await this.usersService.forgotPassword(body);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: ResetPasswordDto): Promise<{message: string}> {
+    return await this.usersService.resetPassword(body);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
-  async getUsers(@Query() query: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password'>>> {
-    return this.usersService.getUsers(query);
+  async getUsers(@Query() query: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>>> {
+    return await this.usersService.getUsers(query);
   }
 
   @UseGuards(JwtAuthGuard)
