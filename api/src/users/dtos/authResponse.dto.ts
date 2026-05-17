@@ -1,6 +1,6 @@
 import { User } from '../users.entity';
 
 export class AuthResponseDto {
-  user!: Omit<User, 'name' | 'password' | 'phone' | 'country' | 'address' | 'city' | 'isBlocked' | 'isDeleted' | 'orders'>
+  user!: Omit<User, 'name' | 'password' | 'phone' | 'country' | 'address' | 'city' | 'isBlocked' | 'isDeleted' | 'orders' | 'resetToken' | 'resetTokenExpires'>
   access_token!: string
 }
