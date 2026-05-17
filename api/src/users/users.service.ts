@@ -3,6 +3,7 @@ import { UsersRepository } from './users.repository';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { User } from './users.entity';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResponseDto } from './dtos/authResponse.dto';
@@ -11,11 +12,15 @@ import { UsersQueryDto } from './dtos/usersQueryDto.dto';
 import { PaginationResult } from './interfaces/paginationMeta.interface';
 import { UserRole } from './enums/userRole.enum';
 import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
+import { ResendService } from '../resend/resend.service';
+import { ForgotPasswordDto } from './dtos/forgotPasswordDto.dto';
+import { ResetPasswordDto } from './dtos/resetPasswordDto.dto';
 
 @Injectable()
 export class UsersService {
   constructor (private readonly usersRepository: UsersRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly resendService: ResendService
   ) {}
 
   async signUp({name, email, password, phone, country, address, city, role = UserRole.USER}: UsersBodyDto): Promise<Omit<User, 'password'>>  {
@@ -69,7 +74,45 @@ export class UsersService {
     }   
   }
 
-  async getUsers({page, limit}: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password'>>> {
+  async forgotPassword({email}: ForgotPasswordDto): Promise<{message: string}> {
+    const user: User | null = await this.usersRepository.getUserByEmail(email);
+    if (!user) return {message: 'We have sent the link to the email address you provided, please check your inbox.'};
+
+    const token: string = crypto.randomBytes(32).toString('hex');
+    // console.log('TOKEN: ', token);
+
+    const resetToken: string = await bcrypt.hash(token, 10);
+    const resetTokenExpires: Date = new Date(Date.now() + 1000 * 60 * 15);
+
+    await this.usersRepository.updateUser(user, {resetToken: resetToken, resetTokenExpires: resetTokenExpires});
+
+    await this.resendService.sendResetPasswordEmail(user.id, email, token);
+
+    return {
+      message: 'We have sent the link to the email address you provided, please check your inbox.'
+    }
+
+  }
+
+  async resetPassword({userId, token, password}: ResetPasswordDto): Promise<{message: string}> {
+    const user: Omit<User, 'password'> = await this.getUserById(userId);
+
+    if (!user.resetToken || !user.resetTokenExpires) throw new BadRequestException('Invalid token');
+  
+    const isValid: boolean = await bcrypt.compare(token, user.resetToken);
+
+    if (!isValid) throw new BadRequestException('Invalid token');
+
+    if (user.resetTokenExpires !== null && user.resetTokenExpires < new Date()) throw new BadRequestException('Expired token');
+
+    const hashedPassword: string = await bcrypt.hash(password, 10);
+
+    await this.usersRepository.updateUser(user, {password: hashedPassword, resetToken: null, resetTokenExpires: null});
+
+    return { message: 'Password updated successfully' };
+  }
+
+  async getUsers({page, limit}: UsersQueryDto): Promise<PaginationResult<Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>>> {
     const currentPage: number = page && page > 0 ? page : 1;
     const pageSize: number = limit && limit > 0 ? Math.min(limit, 100) : 10;
     const skip: number = (currentPage - 1) * pageSize;
@@ -77,7 +120,7 @@ export class UsersService {
     try{
       const result: [User[], number] = await this.usersRepository.getUsers(pageSize, skip);
 
-      const data: Omit<User, 'password'>[] = result[0].map((user: User): Omit<User, 'password'> => {
+      const data: Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[] = result[0].map((user: User): Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'> => {
         return {
           id: user.id,
           name: user.name,
