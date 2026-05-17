@@ -21,7 +21,7 @@ export class UsersRepository {
     return userWithoutPassword;
   }
 
-  async getUsers (pageSize: number, skip: number): Promise<[Omit<User[], 'password'>, number]> {
+  async getUsers (pageSize: number, skip: number): Promise<[Omit<User[], 'password' | 'resetToken' | 'resetTokenExpires'>, number]> {
     const [users, total]: [User[], number] = await this.usersRepository.findAndCount({
       skip: skip,
       take: pageSize,
@@ -37,13 +37,13 @@ export class UsersRepository {
     const user: Omit<User, 'password'> | null = await this.usersRepository.findOne({
       where: { id, isDeleted: false },
       relations: ['orders'],
-      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted', 'orders']
+      select: ['id', 'name', 'email', 'phone', 'country', 'address', 'city', 'role', 'isBlocked', 'isDeleted', 'orders', 'resetToken', 'resetTokenExpires']
     });
     return user;
   }
 
-  async updateUser(user: Omit<User, 'password'>, {name, email, phone, country, address, city, role = UserRole.USER}: UsersUpdateDto): Promise<{message: string}> {
-    Object.assign(user, {name, email, phone, country, address, city, role})
+  async updateUser(user: Omit<User, 'password'>, {name, email, password, phone, country, address, city, role = UserRole.USER, resetToken, resetTokenExpires}: UsersUpdateDto): Promise<{message: string}> {
+    Object.assign(user, {name, email, password, phone, country, address, city, role, resetToken, resetTokenExpires})
     await this.usersRepository.save(user);
 
     return {
