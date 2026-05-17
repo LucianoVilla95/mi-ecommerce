@@ -38,6 +38,12 @@ export class User {
   })
   role!: UserRole;
 
+  @Column({type: 'varchar', nullable: true})
+  resetToken!: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExpires!: Date | null;
+
   @Column({name: 'is_blocked' ,default: false})
   isBlocked!: boolean;
 
