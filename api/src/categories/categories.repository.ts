@@ -11,8 +11,8 @@ export class CategoriesRepository {
     return await this.categoriesRepository.findOne({where: {name}});
   }
 
-  async createCategory(name: string, slug: string): Promise<Category> {
-    const category: Category = await this.categoriesRepository.create({name, slug});
+  async createCategory(name: string, secure_url: string, public_id: string, slug: string): Promise<Category> {
+    const category: Category = await this.categoriesRepository.create({name, imgUrl: secure_url, imgPublicId: public_id, slug});
     return await this.categoriesRepository.save(category);
   }
 
@@ -24,5 +24,14 @@ export class CategoriesRepository {
   async getCategoryById(id: string): Promise<Category | null> {
     const category: Category | null = await this.categoriesRepository.findOne({ where: {id} });
     return category; 
+  }
+
+  async updateCategory(category: Category, name?: string, secure_url?: string, public_id?: string, slug?: string): Promise<{message: string}> {
+    Object.assign(category, {name, imgUrl: secure_url, imgPublicId: public_id, slug});
+    await this.categoriesRepository.save(category);
+  
+    return {
+      message: 'Category updated successfully'
+    }
   }
 }
