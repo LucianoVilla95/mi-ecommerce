@@ -1,4 +1,4 @@
-import { Controller, Post,Get, Patch, Delete, Body, UseGuards, Query, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post,Get, Patch, Delete, Body, UseGuards, Query, Param, ParseUUIDPipe, Res } from '@nestjs/common';
 import { UsersBodyDto } from './dtos/usersBodyDto.dto';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
@@ -14,6 +14,7 @@ import { UsersUpdateDto } from './dtos/usersUpdateDto.dto';
 import { PaginationResult } from './interfaces/paginationMeta.interface';
 import { ForgotPasswordDto } from './dtos/forgotPasswordDto.dto';
 import { ResetPasswordDto } from './dtos/resetPasswordDto.dto';
+import type { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -25,8 +26,20 @@ export class UsersController {
   }
 
   @Post('signin')
-  async signIn(@Body() body: UsersCredentialsDto): Promise<AuthResponseDto> {
-    return await this.usersService.signIn(body);
+  async signIn(@Body() body: UsersCredentialsDto, @Res({ passthrough: true }) response: Response): Promise<Omit<AuthResponseDto, 'access_token'>> {
+    const authData: AuthResponseDto = await this.usersService.signIn(body);
+
+    response.cookie('access_token', authData.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24,
+      path: '/',
+    })
+
+    return {
+      user: authData.user,
+    }
   }
   
   @Post('forgot-password')
