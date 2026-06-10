@@ -15,7 +15,7 @@ const CategoryList = async (): Promise<JSX.Element> => {
   const fetchData: Category[] = await fetchCategories();
 
   return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar px-1">
+    <div className="flex justify-center gap-4 overflow-x-auto no-scrollbar px-1">
       {
         fetchData.map((item) => (
         <CategoryItem key={item.id} name={item.name} imgUrl={item.imgUrl} />
