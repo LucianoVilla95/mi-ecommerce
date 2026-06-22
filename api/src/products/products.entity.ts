@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { v4 as uuid} from 'uuid';
 import { Category } from '../categories/categories.entity';
 import { OrderDetail } from '../orders/orderDetails.entity';
 
@@ -8,7 +7,7 @@ import { OrderDetail } from '../orders/orderDetails.entity';
 })
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  id!: string;
 
   @Column({length: 100, nullable: false})
   name!: string;
@@ -19,7 +18,11 @@ export class Product {
   @Column('decimal', {
     precision: 10,
     scale: 2,
-    nullable: false
+    nullable: false,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value)
+    }
   })
   price!: number;
 
