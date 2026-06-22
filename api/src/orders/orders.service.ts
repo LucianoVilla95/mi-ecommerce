@@ -11,6 +11,7 @@ import { DataSource, EntityManager, DeleteResult } from 'typeorm';
 import { OrderDetail } from './orderDetails.entity';
 import { RemoveProductsDto } from './dtos/removeProductDto.dto';
 import { MercadoPagoService } from '../mercadopago/mercadopago.service';
+import { AddToCartDto } from './dtos/addToCartDto.dto';
 
 @Injectable()
 export class OrdersService {
@@ -26,7 +27,7 @@ export class OrdersService {
       
       let order: Order | null = await this.ordersRepository.getOrderByUser(user, manager);
       
-      if (!order) order = await this.ordersRepository.createOrder(user);
+      if (!order) order = await this.ordersRepository.createOrder(user, manager);
       
       return order;
   }
@@ -35,6 +36,34 @@ export class OrdersService {
     const orderDetail: OrderDetail | null = await this.ordersRepository.getOrderDetail(order, product, manager);
 
     return orderDetail;
+  }
+
+  async mergeCart({sub}: JwtPayload, {items}: AddToCartDto): Promise<{message: string}> {
+    return await this.dataSource.transaction(async (manager: EntityManager) => {
+      const order: Order = await this.getOrCreateOrder(sub, manager);
+      
+      for (const item of items) {
+        const product: Product = await this.productsService.getProductById(item.productId, manager);
+        let orderDetailExisting: OrderDetail | null = await this.getOrderDetail(order, product, manager);
+
+        if (orderDetailExisting) {
+          const totalQuantity: number = orderDetailExisting.quantity + item.quantity;
+        
+          if (totalQuantity > product.stock) {
+            orderDetailExisting.quantity = Math.min(totalQuantity, product.stock);
+          } else {
+            orderDetailExisting.quantity = totalQuantity;
+          }
+          await this.ordersRepository.updateOrderDetail(orderDetailExisting,manager);
+          
+        } else {
+          await this.ordersRepository.createOrderDetail(order, product, item.quantity, product.price, manager);
+        }
+      }
+      return {
+        message: 'Products added successfully!',
+      };
+    });
   }
 
   async addProduct({sub}: JwtPayload, {productId, quantity}: AddProductsDto): Promise<{message: string}> {
@@ -59,11 +88,17 @@ export class OrdersService {
   }
 
   async removeProduct(id: string, sub: string, manager?: EntityManager): Promise<{message: string}> {
-    const order: Order = await this.getOrCreateOrder(sub, manager);
+    const user: Omit<User, 'password'> = await this.usersService.getUserById(sub);
 
-    const result: DeleteResult = await this.ordersRepository.deleteOrderDetail(order, id, manager);
+    const order: Order | null = await this.ordersRepository.getOrderByUser(user, manager);
 
-    if (!result.affected) throw new NotFoundException(`OrderDetail not found for orderId = ${order.id} and productId = ${id}`);
+    if (!order) {
+      throw new NotFoundException('No active shopping cart found for this user');
+    }
+
+    const result: DeleteResult = await this.ordersRepository.deleteOrderDetail(id, manager);
+
+    if (!result.affected) throw new NotFoundException('Product not found in your shopping cart');
 
     return {
       message: 'Product removed successfully!'
@@ -78,7 +113,7 @@ export class OrdersService {
       
       if (!orderDetailExisting) throw new NotFoundException('Product not in cart');
 
-      if (quantity === 0) return await this.removeProduct(id, sub, manager);
+      if (quantity === 0) return await this.removeProduct(orderDetailExisting.id, sub, manager);
 
       if (quantity > product.stock) throw new BadRequestException('Insufficient stock');
 
@@ -93,18 +128,20 @@ export class OrdersService {
 
   async getOrder({sub}: JwtPayload): Promise<Omit<Order, 'user' | 'date' | 'isActive'> & {userId: string, total: number}> {
     const order: Order = await this.getOrCreateOrder(sub);
+
+    const details = order.details || [];
     
-    const total = order.details.reduce((acc, item) => acc + item.price * item.quantity,0);
+    const total = details.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     return {
       id: order.id,
-      userId: order.user.id,
-      details: order.details,
+      userId: sub,
+      details: details,
       total,
     };
   }
 
-  async getOrderById(id?: string, manager?: EntityManager): Promise<Order> {
+  async getOrderById(id: string, manager?: EntityManager): Promise<Order> {
     const order: Order | null = await this.ordersRepository.getOrderById(id, manager);
 
     if (!order) throw new NotFoundException('Order not found');
@@ -113,25 +150,30 @@ export class OrdersService {
   }
 
   async checkout ({sub}: JwtPayload): Promise<{url: string}> {
-    return await this.dataSource.transaction<{url: string}>(async (manager: EntityManager) => {
-      const order: Order = await this.getOrCreateOrder(sub, manager);
+    const order = await this.dataSource.transaction<Order>(async (manager: EntityManager) => {
+      const activeOrder: Order = await this.getOrCreateOrder(sub, manager);
 
-      if (order.details.length === 0) throw new NotFoundException('Empty cart')
-        
-      for (const item of order.details) {
+      if (!activeOrder.details || activeOrder.details.length === 0) {
+        throw new NotFoundException('Empty cart');
+      }
+
+      for (const item of activeOrder.details) {
         const product: Product = await this.productsService.getProductById(item.product.id, manager);
         if (item.quantity > product.stock) throw new BadRequestException('Insufficient stock');
       }
 
-      const preference = await this.mercadoPagoService.createPreference(order);
+      return activeOrder;
+    });
 
-      if (!preference.init_point) throw new InternalServerErrorException('No payment URL generated');
+    const preference = await this.mercadoPagoService.createPreference(order);
 
-      const url: string = preference.init_point;
+    if (!preference.init_point) throw new InternalServerErrorException('No payment URL generated');
+    
+    const url: string = preference.init_point;
 
-      return {url};
-    })
+    return {url};       
   }
+
 
   async processOrder(orderId: string) {
     await this.dataSource.transaction<void | {message: string}>(async (manager: EntityManager) => {
@@ -141,6 +183,7 @@ export class OrdersService {
       }
       for (const item of order.details) {
         const product = await this.productsService.getProductById(item.product.id, manager);
+        if (product.stock < item.quantity) throw new BadRequestException(`Critical: Insufficient stock for product ${product.name} during processing`);
         product.stock -= item.quantity;
         await this.productsService.updateStock(product, manager);
       }
@@ -150,31 +193,33 @@ export class OrdersService {
   }
 
   async handleWebhook(id: string, topic: string): Promise<{message: string}> {
+    if (!id || !topic) {
+      return { message: 'Invalid webhook data' };
+    }
+
+    if (topic !== 'payment') {
+      return { message: `Topic ${topic} ignored` };
+    }
+    
     try {
-      if (!id || !topic) {
-        return { message: 'Invalid webhook data' };
+      const payment = await this.mercadoPagoService.getPayment(Number(id));
+
+      if (!payment.external_reference) {
+        return { message: 'No external reference found in payment' };
       }
 
-      if (topic === 'payment') {
-        const payment = await this.mercadoPagoService.getPayment(Number(id));
-        
-        if (!payment.external_reference) {
-          return { message: 'No external reference' };
-        }
-        if (payment.status !== 'approved') {
-          return { message: `Ignored status: ${payment.status}` };
-        }
-
-        await this.processOrder(payment.external_reference);
+      if (payment.status !== 'approved') {
+        return { message: `Payment not approved. Current status: ${payment.status}` };
       }
 
-      return {
-        message: 'Purchase made successfully'
-      }
+      await this.processOrder(payment.external_reference);
+
+      return { message: 'Purchase made successfully' };
+
     } catch (error) {
       console.error('Webhook error:', error);
       
-      return { message: 'Error processing payment' }
+      throw new InternalServerErrorException('Error processing payment webhook');
     }
   }
 }
