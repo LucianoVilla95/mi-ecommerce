@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { v4 as uuid } from 'uuid';
 import { Product } from "../products/products.entity";
 
 @Entity({
@@ -7,7 +6,7 @@ import { Product } from "../products/products.entity";
 })
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  id!: string;
 
   @Column({length: 50, unique: true, nullable: false})
   name!: string;
