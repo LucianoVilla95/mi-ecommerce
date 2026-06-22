@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, UseGuards, ParseUUIDPipe, Patch, Get, Query, Headers, ConsoleLogger } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, UseGuards, ParseUUIDPipe, Patch, Get, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { AddProductsDto } from './dtos/addProductDto.dto';
 import { JwtAuthGuard } from '../guards/auth.guard';
@@ -6,11 +6,17 @@ import { CurrentUser } from '../decorators/currentUser.decorator';
 import type { JwtPayload } from '../users/interfaces/jwtPayload.interface';
 import { RemoveProductsDto } from './dtos/removeProductDto.dto';
 import { Order } from './orders.entity';
-import { MercadoPagoWebhookDto } from './dtos/mercadoPagoWebhookDto.dto';
+import { AddToCartDto } from './dtos/addToCartDto.dto';
 
 @Controller('orders')
 export class OrdersController {
   constructor (private readonly ordersService: OrdersService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post('merge/cart')
+  async mergeCart(@Body() body: AddToCartDto, @CurrentUser() user: JwtPayload): Promise<{message: string}> {
+    return await this.ordersService.mergeCart(user, body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -32,7 +38,7 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getCart(@CurrentUser() user: JwtPayload): Promise<Omit<Order, 'user' | 'date' | 'isActive'> & {total: number}> {
+  async getCart(@CurrentUser() user: JwtPayload): Promise<Omit<Order, 'user' | 'date' | 'isActive'> & {userId: string, total: number}> {
     return await this.ordersService.getOrder(user);
   }
 
@@ -43,23 +49,28 @@ export class OrdersController {
   }
 
   @Post('webhook/mercadopago')
-  handleWebhook(@Body() body: MercadoPagoWebhookDto): Promise<{message: string}> {
-    console.log('Webhook recibido:', body);
-    const paymentId: string | undefined = body?.data?.id;
-    const topic: string | undefined = body?.type;
+  handleWebhook(@Body() body: any, @Query() query: any): Promise<{message: string}> {
+    console.log('Webhook recibido:', body, query);
+    let paymentId: string | undefined;
+    let topic: string | undefined;
+
+    if (body.data?.id || body.type === 'payment' || query.topic === 'payment') {
+      paymentId = body.data?.id || query.id || body.id;
+      topic = query.topic || body.type;
+    } else if (body.topic === 'merchant_order' || query.topic === 'merchant_order' || body.resource) {
+      topic = body.topic || query.topic;
     
-    console.log('Normalized:', {
-      id: paymentId,
-      topic: topic
-    });
+      if (body.resource) {
+        const parts = body.resource.split('/');
+        paymentId = parts[parts.length - 1];
+      } else {
+        paymentId = query.id || body.id;
+      }
+    } 
+    console.log('Normalized:', { id: paymentId, topic: topic });
     if (!paymentId || topic !== 'payment') {
-      return Promise.resolve({ message: 'Ignored' });
+      return Promise.resolve({ message: 'Notification acknowledged but ignored' });
     }
     return this.ordersService.handleWebhook(paymentId, topic)
-  }
-
-  @Get('payment/success')
-  success() {
-    return 'ok';
   }
 }
