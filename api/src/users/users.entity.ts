@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 import { UserRole } from '../users/enums/userRole.enum';
 import { Order } from '../orders/orders.entity';
 
@@ -8,7 +7,7 @@ import { Order } from '../orders/orders.entity';
 })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  id!: string;
 
   @Column({length: 50, nullable: false})
   name!: string;
