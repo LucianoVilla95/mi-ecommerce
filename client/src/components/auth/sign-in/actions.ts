@@ -1,7 +1,6 @@
 'use server';
 
 import { z } from 'zod';
-import { redirect } from "next/navigation";
 import { FormState } from '../sign-up/types';
 import { registerSchema } from '../sign-up/types';
 import { cookies } from 'next/headers';
@@ -9,7 +8,9 @@ import { cookies } from 'next/headers';
 const loginSchema = registerSchema.pick({ email: true, password: true });
 
 const extractHeaderToken = (header: string): string => {
-  return header.split(';')[0].split('=')[1];
+  const match = header.match(/access_token=([^;]+)/);
+  
+  return match ? match[1].trim() : '';
 }
 
 export const signInUser = async (statePrevious: FormState | void, formData: FormData): Promise<FormState | void> => {
@@ -28,8 +29,6 @@ export const signInUser = async (statePrevious: FormState | void, formData: Form
       }
     }
   };
-
-  let result: boolean = false;
   
   const {email, password} = validacion.data;
   
@@ -67,7 +66,9 @@ export const signInUser = async (statePrevious: FormState | void, formData: Form
       })
     }
     
-    result = true;
+    return {
+      success: true,
+    };
   
     } catch (error) {
   
@@ -76,9 +77,5 @@ export const signInUser = async (statePrevious: FormState | void, formData: Form
         error: 'No se pudo conectar con el servidor',
         fields: { email, password }
       };
-    }
-
-    if (result) {
-      redirect('/');
     }
 };
