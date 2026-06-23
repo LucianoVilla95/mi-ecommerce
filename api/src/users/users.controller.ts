@@ -28,7 +28,7 @@ export class UsersController {
   @Post('signin')
   async signIn(@Body() body: UsersCredentialsDto, @Res({ passthrough: true }) response: Response): Promise<Omit<AuthResponseDto, 'access_token'>> {
     const authData: AuthResponseDto = await this.usersService.signIn(body);
-
+    console.log(authData.access_token)
     response.cookie('access_token', authData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
