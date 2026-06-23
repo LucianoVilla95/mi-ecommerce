@@ -1,13 +1,42 @@
 'use client';
-import { JSX, useActionState, useState } from 'react';
+import { JSX, useActionState, useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { signInUser } from './actions';
 import { FormState } from '../sign-up/types';
+import { useRouter } from 'next/navigation';
+import { useSyncCart } from '@/hooks/use-sync-cart';
+import { useCartStore } from '@/stores/cart.store';
+import { CartItem } from '@/services/types';
 
 const SignIn = (): JSX.Element => {
   const [state, formAction, isPending] = useActionState<null | FormState | void, FormData>(signInUser, null);
   const [password, setPassword] = useState<boolean>(false);
+  const router = useRouter();
+  const { mutate: syncCart } = useSyncCart();
+  const hasSynced = useRef(false);
+  const items: CartItem[] = useCartStore(state => state.items);
+
+  useEffect(() => {
+    if (!state?.success || hasSynced.current) return;
+    hasSynced.current = true;
+
+    if (items.length === 0) {
+      router.push('/');
+      return;
+    }
+    const timer = setTimeout(() => {
+      syncCart(undefined, {
+        onSuccess: () => {
+          router.push('/');
+        },
+        onError: () => {
+          router.push('/');
+        }
+      });
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [state?.success, router, syncCart, items]);
 
   return (
     <main className="max-w-md mx-auto h-auto bg-gray-300 mt-24 px-6 py-6 border rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.50)]">
