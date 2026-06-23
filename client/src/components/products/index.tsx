@@ -10,14 +10,14 @@ export const fetchProducts = async (): Promise<PaginationResult<Product>> => {
   return results;
 }
 
-const Products = async (): Promise<JSX.Element> => {
+const Products = async ({isAuthenticated}: {isAuthenticated: boolean}): Promise<JSX.Element> => {
   const fetchData: PaginationResult<Product> = await fetchProducts();
 
   return (
-    <div className="grid grid-cols-2 gap-5 p-4">
+    <div className="grid grid-cols-2 gap-5 p-4 md:grid-cols-3 lg:grid-cols-4">
       {
         fetchData.data.map((item) => (
-          <ProductItem key={item.id} name={item.name} imgUrl={item.imgUrl} price={item.price} />
+          <ProductItem key={item.id} productId={item.id} name={item.name} imgUrl={item.imgUrl} price={item.price} description={item.description} isAuthenticated={isAuthenticated} />
         ))
       }
     </div>
