@@ -1,17 +1,22 @@
+import { JSX } from 'react'; 
 import AnnouncementBar from "@/components/announcement-bar";
-import Header from "@/components/header";
-import SearchBar from "@/components/search-bar";
+import CartDrawer from "@/components/cart-drawer/index";
 import Categories from "@/components/categories";
 import Products from "@/components/products";
+import { cookies } from 'next/headers';
 
-export default function Home() {
+const Home = async (): Promise<JSX.Element> => {
+  const cookieStore = await cookies();
+  const isAuthenticated: boolean = cookieStore.has('access_token');
+
   return (
-    <main className="max-w-md mx-auto pb-16">
+    <main className="min-h-screen bg-neutral-50 max-w-7xl mx-auto">
       <AnnouncementBar />
-      <Header />
-      <SearchBar />
       <Categories />
-      <Products />
+      <Products isAuthenticated={isAuthenticated} />
+      <CartDrawer isAuthenticated={isAuthenticated} />
     </main>
   );
 }
+
+export default Home;
