@@ -1,11 +1,13 @@
-import { LucideOctagonMinus } from 'lucide-react';
 import { JSX } from 'react';
+import Link from 'next/link';
 
 const Logo = (): JSX.Element => {
   return (
-    <h1 className="text-3xl font-bold tracking-tight">
-      SHOP APP
-    </h1>
+    <Link href="/">
+      <h1 className="text-3xl font-bold tracking-tight cursor-pointer">
+        AVORA
+      </h1>
+    </Link>
   )
 };
 
