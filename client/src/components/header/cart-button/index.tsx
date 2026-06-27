@@ -1,14 +1,15 @@
+'use client';
 import { JSX } from 'react';
 import { ShoppingCart } from 'lucide-react';
+import { useUICartStore } from '@/stores/uicart.store';
 
 const CartButton = (): JSX.Element => {
+  const openCart = useUICartStore((state) => state.openCart);
+
   return (
-    <button className="relative">
-      <ShoppingCart className="w-6 h-6"/>
-      <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-        2
-      </span>
-    </button>
+      <button onClick={openCart} className="relative p-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-200 hover:scale-105">
+        <ShoppingCart className="w-6 h-6"/>
+      </button>
   )
 };
 
