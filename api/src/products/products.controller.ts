@@ -32,6 +32,11 @@ export class ProductsController {
     return await this.productsService.getProducts(query);
   }
 
+  @Get('search')
+  async searchProducts(@Query() query: ProductsQueryDto): Promise<PaginationResult<Product>> {
+    return await this.productsService.searchProductsByName(query);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @UseInterceptors(FileInterceptor('file'))
