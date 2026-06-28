@@ -28,6 +28,25 @@ export class ProductsRepository {
     return [products, total];
   }
 
+  async searchByName(words: string[], page: number, limit: number) {
+    const queryBuilder = this.productsRepository.createQueryBuilder('product');
+    queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
+
+    words.forEach((word, index) => {
+      queryBuilder.andWhere(
+        `product.name ILIKE :word${index}`,
+        { [`word${index}`]: `%${word}%` },
+      );
+    });
+
+    const [products, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return { products, total };
+  }
+
   async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
     const queryBuilder = manager
     ? manager.getRepository(Product).createQueryBuilder('product')
