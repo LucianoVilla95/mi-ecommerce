@@ -24,3 +24,8 @@ export interface PaginationResult<T> {
   data: T[];
   meta: PaginationMeta;
 }
+
+export interface ProductsProps {
+  isAuthenticated: boolean;
+  searchParams?: Promise<{ search?: string; page?: string }>;
+}
