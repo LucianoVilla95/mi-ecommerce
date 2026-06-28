@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, ConflictException, HttpException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, ConflictException, HttpException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ProductsRepository } from './products.repository';
 import { CategoriesService } from '../categories/categories.service';
 import { Category } from '../categories/categories.entity';
@@ -92,6 +92,29 @@ export class ProductsService {
     return product;
   }
 
+  async searchProductsByName({name, page = 1, limit = 10}: ProductsQueryDto): Promise<PaginationResult<Product>> {
+    if (!name || !name.trim()) {
+      throw new BadRequestException('Search query is required');
+    }
+
+    const words = name.trim().split(/\s+/);
+
+    const { products, total } = await this.productsRepository.searchByName(words, page, limit);
+
+  return {
+    data: products,
+    meta: {
+      total: total,
+      currentPage: page,
+      lastPage: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async updateStock(product: Product, manager?: EntityManager): Promise<{message: string}> {
+    return await this.productsRepository.updateStock(product, manager);
+  }
+
   async updateProduct(id: string, {name, description, price, stock, categoryId, isActive}: ProductsUpdateDto, file?: Express.Multer.File): Promise<{message: string}> {
     const product: Product = await this.getProductById(id);
     
@@ -120,10 +143,6 @@ export class ProductsService {
     }
 
     return await this.productsRepository.updateProduct(product, name, description, price, stock, uploadedImage?.secure_url, uploadedImage?.public_id, slug, isActive, category);
-  }
-
-  async updateStock(product: Product, manager?: EntityManager): Promise<{message: string}> {
-    return await this.productsRepository.updateStock(product, manager);
   }
 
   async deleteProduct(id: string): Promise<{message: string}> {
