@@ -23,7 +23,7 @@ import { OrdersModule } from './orders/orders.module';
     PassportModule,
     JwtModule.register({
       global: true,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '1d' },
       secret: process.env.JWT_SECRET
     }),
   UsersModule, ProductsModule, CategoriesModule, OrdersModule],
