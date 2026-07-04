@@ -28,7 +28,7 @@ const Products = async ({isAuthenticated, searchParams}: ProductsProps): Promise
   if (searchQuery.trim() !== '') {
     fetchData = await fetchSearchResults(searchQuery, currentPage);
   } else {
-    fetchData = await fetchProducts(currentPage); // Pasamos la página correspondiente al catálogo común
+    fetchData = await fetchProducts(currentPage);
   }
 
   if (!fetchData.data || fetchData.data.length === 0) {
@@ -43,7 +43,7 @@ const Products = async ({isAuthenticated, searchParams}: ProductsProps): Promise
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-12rem)]">
-      <div className="grid grid-cols-2 gap-5 p-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {
           fetchData.data.map((item) => (
             <ProductItem key={item.id} productId={item.id} name={item.name} imgUrl={item.imgUrl} price={item.price} description={item.description} isAuthenticated={isAuthenticated} />
