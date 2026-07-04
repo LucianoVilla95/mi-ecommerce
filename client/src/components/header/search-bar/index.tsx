@@ -54,7 +54,7 @@ const SearchBar = (): JSX.Element => {
   }, [searchParams]);
 
   return (
-    <div className="flex flex-1 max-w-2xl items-center border rounded-xl h-10 pl-2 focus-within:ring-2 focus-within:ring-black">
+    <div className="flex items-center border rounded-xl h-10 pl-2 focus-within:ring-2 focus-within:ring-black">
       <input type="text" id="search" name="search" placeholder="Buscar productos..." value={inputValue} onChange={(e) => handleChange(e.target.value)} className="w-full outline-none border-r" />
       {inputValue && (
         <button
