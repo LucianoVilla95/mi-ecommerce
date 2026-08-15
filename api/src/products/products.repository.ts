@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './products.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, Brackets } from 'typeorm';
 import { Category } from '../categories/categories.entity';
 
 @Injectable()
@@ -29,23 +29,39 @@ export class ProductsRepository {
   }
 
   async searchByName(words: string[], page: number, limit: number) {
-    const queryBuilder = this.productsRepository.createQueryBuilder('product');
-    queryBuilder.andWhere('product.isActive = :isActive', { isActive: true });
+  const queryBuilder = this.productsRepository.createQueryBuilder('product');
+  queryBuilder.where('product.isActive = :isActive', { isActive: true });
 
-    words.forEach((word, index) => {
-      queryBuilder.andWhere(
-        `product.name ILIKE :word${index}`,
-        { [`word${index}`]: `%${word}%` },
-      );
-    });
+  const fullSearchTermWithNoSpaces = words.join('');
 
-    const [products, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
+  queryBuilder.andWhere(
+    new Brackets((qb) => {
+      qb.where("REPLACE(product.name, ' ', '') ILIKE :fullTerm", {
+        fullTerm: `%${fullSearchTermWithNoSpaces}%`,
+      });
 
-    return { products, total };
-  }
+      if (words.length > 1) {
+        qb.orWhere(
+          new Brackets((subQb) => {
+            words.forEach((word, index) => {
+              subQb.andWhere(`product.name ILIKE :word${index}`, {
+                [`word${index}`]: `%${word}%`,
+              });
+            });
+          }),
+        );
+      }
+    }),
+  );
+
+  const [products, total] = await queryBuilder
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getManyAndCount();
+
+  return { products, total };
+}
+
 
   async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
     const queryBuilder = manager
