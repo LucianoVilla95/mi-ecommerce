@@ -21,8 +21,8 @@ export class UsersRepository {
     return userWithoutPassword;
   }
 
-  async getUsers (pageSize: number, skip: number): Promise<[Omit<User[], 'password' | 'resetToken' | 'resetTokenExpires'>, number]> {
-    const [users, total]: [User[], number] = await this.usersRepository.findAndCount({
+  async getUsers (pageSize: number, skip: number): Promise<[Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[], number]> {
+    const [users, total]: [Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[], number] = await this.usersRepository.findAndCount({
       skip: skip,
       take: pageSize,
       where: { isDeleted: false, role: UserRole.USER },
