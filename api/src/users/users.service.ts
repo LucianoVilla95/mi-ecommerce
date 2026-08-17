@@ -91,7 +91,6 @@ export class UsersService {
     return {
       message: 'We have sent the link to the email address you provided, please check your inbox.'
     }
-
   }
 
   async resetPassword({userId, token, password}: ResetPasswordDto): Promise<{message: string}> {
@@ -118,9 +117,9 @@ export class UsersService {
     const skip: number = (currentPage - 1) * pageSize;
     
     try{
-      const result: [User[], number] = await this.usersRepository.getUsers(pageSize, skip);
+      const result: [Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[], number] = await this.usersRepository.getUsers(pageSize, skip);
 
-      const data: Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[] = result[0].map((user: User): Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'> => {
+      const data: Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>[] = result[0].map((user: Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'>): Omit<User, 'password' | 'resetToken' | 'resetTokenExpires'> => {
         return {
           id: user.id,
           name: user.name,
