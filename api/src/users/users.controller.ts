@@ -15,7 +15,7 @@ import { PaginationResult } from './interfaces/paginationMeta.interface';
 import { ForgotPasswordDto } from './dtos/forgotPasswordDto.dto';
 import { ResetPasswordDto } from './dtos/resetPasswordDto.dto';
 import type { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('Users')
 @Controller('users')
@@ -46,7 +46,7 @@ export class UsersController {
     response.cookie('access_token', authData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 1000 * 60 * 60 * 24,
       path: '/',
     })
@@ -72,7 +72,7 @@ export class UsersController {
     return await this.usersService.resetPassword(body);
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Get()
@@ -83,7 +83,7 @@ export class UsersController {
     return await this.usersService.getUsers(query);
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiOperation({ summary: 'Obtener perfil del usuario actual', description: 'Retorna los datos del usuario autenticado a partir de su token.' })
@@ -93,7 +93,7 @@ export class UsersController {
     return await this.usersService.getUserById(user.sub);
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar datos de un usuario', description: 'Modifica las propiedades permitidas de un usuario por su UUID.' })
@@ -105,7 +105,7 @@ export class UsersController {
     return await this.usersService.updateUser(id, body);
   }
 
-  @ApiBearerAuth()
+  @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Delete(':id')
