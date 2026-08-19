@@ -7,7 +7,7 @@ import * as crypto from 'crypto';
 import { UsersCredentialsDto } from './dtos/usersCredentialsDto.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResponseDto } from './dtos/authResponse.dto';
-import { JwtPayload } from './interfaces/jwtPayload.interface';
+import { JwtPayload } from './dtos/jwtPayload.dto';
 import { UsersQueryDto } from './dtos/usersQueryDto.dto';
 import { PaginationResult } from './interfaces/paginationMeta.interface';
 import { UserRole } from './enums/userRole.enum';
