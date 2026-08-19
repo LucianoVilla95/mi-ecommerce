@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', 1); 
   app.use(cookieParser());
 
   app.enableCors({
@@ -25,6 +27,12 @@ async function bootstrap() {
   .setTitle('mi-ecommerce')
   .setDescription('Esta es una API construida con Nest para ecommerce')
   .setVersion('1.0')
+  .addCookieAuth('access_token', {
+    type: 'apiKey',
+    in: 'cookie',
+    name: 'access_token',
+    description: 'Ingresa tu token JWT si deseas probarlo manualmente',
+  })
   .build()
   
   const document = SwaggerModule.createDocument(app, swaggerConfig);
