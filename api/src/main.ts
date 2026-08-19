@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +20,15 @@ async function bootstrap() {
     transform: true,
     stopAtFirstError: true,
   }))
+
+  const swaggerConfig = new DocumentBuilder()
+  .setTitle('mi-ecommerce')
+  .setDescription('Esta es una API construida con Nest para ecommerce')
+  .setVersion('1.0')
+  .build()
   
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();
