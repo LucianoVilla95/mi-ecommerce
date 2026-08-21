@@ -6,7 +6,7 @@ import { User } from '../users/users.entity';
 import { AddProductsDto } from './dtos/addProductDto.dto';
 import { ProductsService } from '../products/products.service';
 import { Product } from '../products/products.entity';
-import { JwtPayload } from '../users/interfaces/jwtPayload.interface';
+import { JwtPayload } from '../users/dtos/jwtPayload.dto';
 import { DataSource, EntityManager, DeleteResult } from 'typeorm';
 import { OrderDetail } from './orderDetails.entity';
 import { RemoveProductsDto } from './dtos/removeProductDto.dto';
