@@ -29,5 +29,5 @@ jobs:
         context: ./api
         file: ./api/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/nest-demo:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/mi-ecommerce-api:latest
         
