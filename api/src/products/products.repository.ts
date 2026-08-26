@@ -28,7 +28,7 @@ export class ProductsRepository {
     return [products, total];
   }
 
-  async searchByName(words: string[], page: number, limit: number) {
+  async searchByName(words: string[], page: number, limit: number): Promise<{products: Product[], total: number}> {
   const queryBuilder = this.productsRepository.createQueryBuilder('product');
   queryBuilder.where('product.isActive = :isActive', { isActive: true });
 
@@ -54,7 +54,7 @@ export class ProductsRepository {
     }),
   );
 
-  const [products, total] = await queryBuilder
+  const [products, total]: [Product[], number] = await queryBuilder
     .skip((page - 1) * limit)
     .take(limit)
     .getManyAndCount();
