@@ -41,7 +41,7 @@ export class ProductsService {
         
       if (error instanceof HttpException) throw error;
 
-      throw new InternalServerErrorException('Error creating user');
+      throw new InternalServerErrorException('Error creating product');
     }
   }
 
@@ -99,14 +99,14 @@ export class ProductsService {
 
     const words = name.trim().split(/\s+/);
 
-    const { products, total } = await this.productsRepository.searchByName(words, page, limit);
+    const { products, total }: {products: Product[], total: number} = await this.productsRepository.searchByName(words, page, limit);
 
-  return {
-    data: products,
-    meta: {
-      total: total,
-      currentPage: page,
-      lastPage: Math.ceil(total / limit)
+    return {
+      data: products,
+      meta: {
+        total: total,
+        currentPage: page,
+        lastPage: Math.ceil(total / limit)
       }
     };
   }
@@ -147,7 +147,6 @@ export class ProductsService {
 
   async deleteProduct(id: string): Promise<{message: string}> {
     const product: Product = await this.getProductById(id);
-    if (!product) throw new NotFoundException('Product not found');
 
     if (product.imgPublicId) await this.cloudinaryService.deleteImage(product.imgPublicId);
 
