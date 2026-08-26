@@ -154,7 +154,7 @@ export class UsersService {
   async getUserById(id: string): Promise<Omit<User, 'password'>> {
     const user: Omit<User, 'password'> | null = await this.usersRepository.getUserById(id);
     
-    if (!user) throw new NotFoundException(`User not found`);
+    if (!user) throw new NotFoundException('User not found');
 
     return user;
   }
