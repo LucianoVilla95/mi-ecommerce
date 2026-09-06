@@ -12,8 +12,8 @@ export class ProductsRepository {
     return await this.productsRepository.findOne({ where: {name}, relations: ['category', 'orderDetails'] })
   }
 
-  async createProduct(name: string, description: string, price: number, stock: number, secure_url: string, public_id: string, slug: string, category: Category): Promise<Product> {
-    const product: Product = await this.productsRepository.create({name, description, price, stock, imgUrl: secure_url, imgPublicId: public_id, slug, category});
+  async createProduct(name: string, description: string, price: number, stock: number, isActive: boolean = true, secure_url: string, public_id: string, slug: string, category: Category): Promise<Product> {
+    const product: Product = await this.productsRepository.create({name, description, price, stock, isActive, imgUrl: secure_url, imgPublicId: public_id, slug, category});
     return await this.productsRepository.save(product);
   }
   
@@ -29,39 +29,38 @@ export class ProductsRepository {
   }
 
   async searchByName(words: string[], page: number, limit: number): Promise<{products: Product[], total: number}> {
-  const queryBuilder = this.productsRepository.createQueryBuilder('product');
-  queryBuilder.where('product.isActive = :isActive', { isActive: true });
+    const queryBuilder = this.productsRepository.createQueryBuilder('product');
+    queryBuilder.where('product.isActive = :isActive', { isActive: true });
 
-  const fullSearchTermWithNoSpaces = words.join('');
+    const fullSearchTermWithNoSpaces = words.join('');
 
-  queryBuilder.andWhere(
-    new Brackets((qb) => {
-      qb.where("REPLACE(product.name, ' ', '') ILIKE :fullTerm", {
-        fullTerm: `%${fullSearchTermWithNoSpaces}%`,
-      });
+    queryBuilder.andWhere(
+      new Brackets((qb) => {
+        qb.where("REPLACE(product.name, ' ', '') ILIKE :fullTerm", {
+          fullTerm: `%${fullSearchTermWithNoSpaces}%`,
+        });
 
-      if (words.length > 1) {
-        qb.orWhere(
-          new Brackets((subQb) => {
-            words.forEach((word, index) => {
-              subQb.andWhere(`product.name ILIKE :word${index}`, {
-                [`word${index}`]: `%${word}%`,
+        if (words.length > 1) {
+          qb.orWhere(
+            new Brackets((subQb) => {
+              words.forEach((word, index) => {
+                subQb.andWhere(`product.name ILIKE :word${index}`, {
+                  [`word${index}`]: `%${word}%`,
+                });
               });
-            });
-          }),
-        );
-      }
-    }),
-  );
+            }),
+          );
+        }
+      }),
+    );
 
-  const [products, total]: [Product[], number] = await queryBuilder
-    .skip((page - 1) * limit)
-    .take(limit)
-    .getManyAndCount();
+    const [products, total]: [Product[], number] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
-  return { products, total };
-}
-
+    return { products, total };
+  }
 
   async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
     const queryBuilder = manager
