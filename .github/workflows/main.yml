@@ -30,4 +30,7 @@ jobs:
         file: ./api/Dockerfile
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/mi-ecommerce-api:latest
-        
+    
+    - name: Trigger Render Deploy
+      run: |
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
