@@ -23,7 +23,7 @@ export class UsersController {
   constructor (private readonly usersService: UsersService) {}
 
   @Post('signup')
-  @ApiOperation({ summary: 'Registrar un nuevo usuario', description: 'Crea una cuenta de usuario en el sistema.' })
+  @ApiOperation({ summary: 'Registrar un nuevo usuario', description: 'Crea una cuenta de usuario en el sistema. Roles permitidos: "user", "admin". Para probar flujos de administrador, use "admin".' })
   @ApiResponse({ status: 201, description: 'Usuario registrado con éxito.' })
   @ApiResponse({ status: 400, description: 'Datos de registro inválidos o el correo ya existe.' })
   async signUp(@Body() body: UsersBodyDto): Promise<Omit<User, 'password'>> {
@@ -42,7 +42,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Credenciales incorrectas.' })
   async signIn(@Body() body: UsersCredentialsDto, @Res({ passthrough: true }) response: Response): Promise<Omit<AuthResponseDto, 'access_token'>> {
     const authData: AuthResponseDto = await this.usersService.signIn(body);
-    console.log(authData.access_token)
+    // console.log(authData.access_token)
     response.cookie('access_token', authData.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
