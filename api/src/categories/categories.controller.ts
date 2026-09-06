@@ -7,7 +7,8 @@ import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/rolesUser.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CategoriesUpdateDto } from './dtos/categoriesUpdateDto.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiConsumes, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiConsumes, ApiParam, ApiBody } from '@nestjs/swagger';
+import { CategoriesBodySwaggerDto } from './dtos/categoriesBodySwaggerDto.dto';
 
 @ApiTags('Categories')
 @Controller('categories')
@@ -20,6 +21,7 @@ export class CategoriesController {
   @UseInterceptors(FileInterceptor('file'))
   @Post()
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CategoriesBodySwaggerDto })
   @ApiOperation({ 
     summary: 'Crear una nueva categoría (Solo Admin)', 
     description: 'Registra una categoría en el sistema junto con su imagen representativa (Máx 5MB, formatos: jpg, jpeg, png, webp).' 
