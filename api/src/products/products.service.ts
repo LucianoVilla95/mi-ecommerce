@@ -19,7 +19,7 @@ export class ProductsService {
     private readonly cloudinaryService: CloudinaryService
   ) {}
 
-  async createProduct({name, description, price, stock, categoryId}: ProductsBodyDto, file: Express.Multer.File): Promise<Product> {
+  async createProduct({name, description, price, stock, isActive = true, categoryId}: ProductsBodyDto, file: Express.Multer.File): Promise<Product> {
     try{
       const category: Category = await this.categoriesService.getCategoryById(categoryId);
 
@@ -34,7 +34,7 @@ export class ProductsService {
 
       const uploadedImage: UploadApiResponse = await this.cloudinaryService.uploadImage(file);
 
-      return await this.productsRepository.createProduct(name, description, price, stock, uploadedImage.secure_url, uploadedImage.public_id, slug, category);
+      return await this.productsRepository.createProduct(name, description, price, stock, isActive, uploadedImage.secure_url, uploadedImage.public_id, slug, category);
 
     } catch (error) {
       console.log(error);
