@@ -23,7 +23,8 @@
     "migration:generate": "npm run typeorm -- -d ./src/config/typeorm.ts migration:generate",
     "migration:create": "npm run typeorm migration:create",
     "migration:revert": "npm run typeorm -- -d ./src/config/typeorm.ts migration:revert",
-    "migration:show": "npm run typeorm -- -d ./src/config/typeorm.ts migration:show"
+    "migration:show": "npm run typeorm -- -d ./src/config/typeorm.ts migration:show",
+    "migration:run:prod": "node ./node_modules/typeorm/cli.js migration:run -d ./dist/config/typeorm.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
