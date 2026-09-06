@@ -9,7 +9,8 @@ import { Roles } from '../decorators/rolesUser.decorator';
 import { JwtAuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiConsumes, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiConsumes, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ProductsBodySwaggerDto } from './dtos/productsBodySwaggerDto.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -22,6 +23,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('file'))
   @Post()
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: ProductsBodySwaggerDto })
   @ApiOperation({ 
     summary: 'Crear un nuevo producto (Solo Admin)', 
     description: 'Registra un producto en la base de datos junto con su imagen de portada (Max 5MB, formatos: jpg, jpeg, png, webp).' 
