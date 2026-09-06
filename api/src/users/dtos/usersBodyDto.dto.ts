@@ -78,6 +78,7 @@ export class UsersBodyDto {
 
   /**
    * Rol asignado al usuario en el sistema
+   * Roles permitidos: "user", "admin". Para probar flujos de administrador, use "admin".
    * @example "user"
    */
   @IsOptional()
