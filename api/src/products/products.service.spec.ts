@@ -181,6 +181,7 @@ describe('ProductsService', () => {
         mockProductDto.description,
         mockProductDto.price,
         mockProductDto.stock,
+        mockProductDto.isActive,
         mockUploadedImage.secure_url,
         mockUploadedImage.public_id,
         'samsung-galaxy-s23', // Resultado esperado de slugify
