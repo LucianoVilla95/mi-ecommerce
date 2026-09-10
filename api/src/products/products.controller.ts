@@ -55,6 +55,29 @@ export class ProductsController {
     return await this.productsService.searchProductsByName(query);
   }
 
+  @Get(':slug')
+  @ApiOperation({ 
+    summary: 'Buscar producto por slug', 
+    description: 'Obtiene los detalles completos del producto.' 
+  })
+  @ApiParam({ 
+    name: 'slug', 
+    description: 'El identificador de URL único del producto, optimizado para SEO.', 
+    example: 'samsung-galaxy-s23' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Producto encontrado con éxito.', 
+    type: Product
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'El producto con el slug "..." no existe o está inactivo.' 
+  })
+  async getProductBySlug(@Param('slug') slug: string): Promise<Product> {
+    return await this.productsService.getProductBySlug(slug);
+  }
+
   @ApiCookieAuth('access_token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
