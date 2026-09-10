@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Category } from '../categories/categories.entity';
 import { OrderDetail } from '../orders/orderDetails.entity';
 
@@ -47,4 +47,10 @@ export class Product {
 
   @OneToMany(() => OrderDetail, orderDetail => orderDetail.product)
   orderDetails!: OrderDetail[];
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt!: Date;
 }
