@@ -62,6 +62,16 @@ export class ProductsRepository {
     return { products, total };
   }
 
+  async getProductBySlug(slug: string): Promise<Product | null> {
+    const queryBuilder = await this.productsRepository.createQueryBuilder('product');
+      queryBuilder
+      .innerJoinAndSelect('product.category', 'category')
+      .where('product.slug = :slug', { slug })
+      .andWhere('product.isActive = :isActive', { isActive: true })
+
+    return queryBuilder.getOne();
+  }
+
   async getProductById (id: string, manager?: EntityManager): Promise<Product | null> {
     const queryBuilder = manager
     ? manager.getRepository(Product).createQueryBuilder('product')
