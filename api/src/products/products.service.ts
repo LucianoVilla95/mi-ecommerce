@@ -65,7 +65,9 @@ export class ProductsService {
           slug: product.slug,
           isActive: product.isActive,
           category: product.category,
-          orderDetails: product.orderDetails
+          orderDetails: product.orderDetails,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
         }
       });
 
@@ -109,6 +111,16 @@ export class ProductsService {
         lastPage: Math.ceil(total / limit)
       }
     };
+  }
+
+  async getProductBySlug(slug: string): Promise<Product> {
+    const product : Product | null = await this.productsRepository.getProductBySlug(slug);
+
+    if (!product) {
+      throw new NotFoundException(`Product with slug "${slug}" does not exist or is inactive`);
+    }
+
+    return product;
   }
 
   async updateStock(product: Product, manager?: EntityManager): Promise<{message: string}> {
