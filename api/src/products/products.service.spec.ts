@@ -19,6 +19,7 @@ describe('ProductsService', () => {
     getProducts: jest.Mock;
     searchByName: jest.Mock;
     getProductById: jest.Mock;
+    getProductBySlug: jest.Mock;
     updateProduct: jest.Mock;
     deleteProduct: jest.Mock;
     updateStock: jest.Mock;
@@ -79,6 +80,8 @@ describe('ProductsService', () => {
     isActive: true,
     orderDetails: [] as OrderDetail[],
     category: mockCategory,
+    createdAt: new Date('2026-03-15T10:00:00.000Z'),
+    updatedAt: new Date('2026-03-15T10:00:00.000Z'),
   };
 
   // Producto simulado con la estructura que mapea tu método
@@ -94,7 +97,9 @@ describe('ProductsService', () => {
       slug: 'samsung-galaxy-s23',
       isActive: true,
       category: mockCategory,
-      orderDetails: [] as OrderDetail[]
+      orderDetails: [] as OrderDetail[],
+      createdAt: new Date('2026-03-15T10:00:00.000Z'),
+      updatedAt: new Date('2026-03-15T10:00:00.000Z'),
     },
     {
       id: '3b5c92da-6f4e-41d8-bd2d-ea7362a9b207',
@@ -107,7 +112,9 @@ describe('ProductsService', () => {
       slug: 'motorola-edge-40',
       isActive: true,
       category: mockCategory,
-      orderDetails: [] as OrderDetail[]
+      orderDetails: [] as OrderDetail[],
+      createdAt: new Date('2026-03-15T10:00:00.000Z'),
+      updatedAt: new Date('2026-03-15T10:00:00.000Z'),
     }
   ];
 
@@ -118,6 +125,7 @@ describe('ProductsService', () => {
       getProducts: jest.fn(),
       searchByName: jest.fn(),
       getProductById: jest.fn(),
+      getProductBySlug: jest.fn(),
       updateProduct: jest.fn(),
       deleteProduct: jest.fn(),
       updateStock: jest.fn(),
@@ -363,6 +371,30 @@ describe('ProductsService', () => {
     });
   });
 
+  describe('getProductBySlug', () => {
+
+    it('should return a product when it exists', async () => {
+      const targetSlug: string = 'awesome-product';
+      mockProductsRepository.getProductBySlug.mockResolvedValue(mockCreatedProduct);
+
+      const result = await productsService.getProductBySlug(targetSlug);
+
+      expect(mockProductsRepository.getProductBySlug).toHaveBeenCalledWith(targetSlug);
+      expect(mockProductsRepository.getProductBySlug).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockCreatedProduct);
+    });
+
+    it('should throw NotFoundException when product does not exist (returns null)', async () => {
+      const targetSlug = 'non-existent-slug';
+      jest.spyOn(mockProductsRepository, 'getProductBySlug').mockResolvedValue(null);
+
+      await expect(productsService.getProductBySlug(targetSlug)).rejects.toThrow(
+        new NotFoundException(`Product with slug "${targetSlug}" does not exist or is inactive`),
+      );
+      expect(mockProductsRepository.getProductBySlug).toHaveBeenCalledWith(targetSlug);
+    });
+  });
+
   describe('updateStock', () => {
 
     const mockEntityManager: any = { id: 'mock-manager-uuid' };
@@ -486,6 +518,8 @@ describe('ProductsService', () => {
         isActive: true,
         orderDetails: [] as OrderDetail[],
         category: mockCategory,
+        createdAt: new Date('2026-03-15T10:00:00.000Z'),
+        updatedAt: new Date('2026-03-15T10:00:00.000Z'),
       };
 
       mockProductsRepository.getProductByName.mockResolvedValue(conflictingProduct);
