@@ -3,25 +3,24 @@ import { PaginationResult, Product, ProductsProps } from './types';
 import ProductItem from './product-item';
 import Pagination from '../pagination';
 
+const getApiUrl = (): string => process.env.BACKEND_API_URL || '';
+
 export const fetchProducts = async (page = 1): Promise<PaginationResult<Product>> => {
-  const response = await fetch(`http://localhost:3001/products?page=${page}&limit=10`, {
+  const response = await fetch(`${getApiUrl()}/products?page=${page}&limit=10`, {
     next: { revalidate: 60 }
   });
-  const results: PaginationResult<Product>= await response.json();
+  const results: PaginationResult<Product> = await response.json();
   return results;
 }
 
-export const fetchSearchResults = async (name: string, page = 1) => {
-  const response = await fetch(`http://localhost:3001/products/search?name=${encodeURIComponent(name)}&page=${page}&limit=10`, {
+export const fetchSearchResults = async (name: string, page = 1): Promise<PaginationResult<Product>> => {
+  const response = await fetch(`${getApiUrl()}/products/search?name=${encodeURIComponent(name)}&page=${page}&limit=10`, {
     cache: 'no-store'
   });
   return await response.json();
 }
 
-const Products = async ({isAuthenticated, searchParams}: ProductsProps): Promise<JSX.Element> => {
-  const resolvedSearchParams = await searchParams;
-  const searchQuery = resolvedSearchParams?.search || '';
-  const currentPage = Number(resolvedSearchParams?.page) || 1;
+const Products = async ({isAuthenticated, searchQuery, currentPage}: ProductsProps): Promise<JSX.Element> => {
 
   let fetchData: PaginationResult<Product>;
 
