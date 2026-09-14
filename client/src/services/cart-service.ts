@@ -1,7 +1,9 @@
 import { CartItem, GetCart, Details } from './types';
 
+const getApiUrl = (): string => process.env.BACKEND_API_URL || '';
+
 export const mergeCart = async (items: CartItem[]): Promise<{message: string}> => {
-  const response = await fetch('http://localhost:3001/orders/merge/cart', {
+  const response = await fetch(`${getApiUrl()}/orders/merge/cart`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -20,7 +22,7 @@ export const mergeCart = async (items: CartItem[]): Promise<{message: string}> =
 };
 
 export const getCart = async (): Promise<GetCart<Details>> => {
-  const response = await fetch('http://localhost:3001/orders', {
+  const response = await fetch(`${getApiUrl()}/orders`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -38,7 +40,7 @@ export const getCart = async (): Promise<GetCart<Details>> => {
 };
 
 export const postCart = async (item: CartItem): Promise<{message: string}> => {
-  const response = await fetch('http://localhost:3001/orders', {
+  const response = await fetch(`${getApiUrl()}/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -57,7 +59,7 @@ export const postCart = async (item: CartItem): Promise<{message: string}> => {
 };
 
 export const removeCart = async (item: CartItem): Promise<{message: string}> => {
-  const response = await fetch(`http://localhost:3001/orders/${item.productId}`, {
+  const response = await fetch(`${getApiUrl()}/orders/${item.productId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -76,7 +78,7 @@ export const removeCart = async (item: CartItem): Promise<{message: string}> => 
 };
 
 export const deleteCart = async (id: string): Promise<{message: string}> => {
-  const response = await fetch(`http://localhost:3001/orders/${id}`, {
+  const response = await fetch(`${getApiUrl()}/orders/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
