@@ -22,8 +22,9 @@ export const useSyncCart = () => {
       queryClient.invalidateQueries({queryKey: queryKeys.cart});
     },
 
-    onError: (error: any) => {
-      console.error("Error crítico al sincronizar el carrito:", error.message || error);
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      console.error("Error crítico al sincronizar el carrito:", errorMessage);
     }
   });
 };
