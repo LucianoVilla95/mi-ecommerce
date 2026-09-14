@@ -12,6 +12,8 @@ export interface Product {
   isActive: boolean;
   category: Category;
   orderDetails: [];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PaginationMeta {
@@ -27,5 +29,6 @@ export interface PaginationResult<T> {
 
 export interface ProductsProps {
   isAuthenticated: boolean;
-  searchParams?: Promise<{ search?: string; page?: string }>;
+  searchQuery: string;
+  currentPage: number;
 }
