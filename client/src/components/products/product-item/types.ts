@@ -5,4 +5,5 @@ export interface ProductProps {
   price: string;
   description: string;
   isAuthenticated?: boolean;
+  slug: string;
 }
