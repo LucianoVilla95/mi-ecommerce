@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { useCartStore } from '@/stores/cart.store';
 import { useAddToCart } from '@/hooks/use-add-to-cart';
 import { useCart } from '@/hooks/use-cart';
+import Link from 'next/link';
 
-const ProductItem = ({productId, name, imgUrl, price, description, isAuthenticated}: ProductProps): JSX.Element => {
+const ProductItem = ({productId, name, imgUrl, price, description, isAuthenticated, slug}: ProductProps): JSX.Element => {
   const addItem = useCartStore((state) => state.addItem);
   const { mutate: handleAddToCart } = useAddToCart();
   const items = useCartStore(state => state.items);
@@ -34,7 +35,9 @@ const ProductItem = ({productId, name, imgUrl, price, description, isAuthenticat
             cartRepeated || cartRepeatedDb ? <Check className="w-4 h-4 mx-auto" /> : <ShoppingCart className="w-6 h-6 mx-auto" />
           }
         </button>
-        <Image src={imgUrl.replace("/upload/","/upload/e_background_removal,b_rgb:a3a3a3/")} width={100} height={100} className="w-40 h-44 mx-auto rounded-xl object-cover" alt="Imagen" priority/>
+        <Link href={`product/${slug}`}>
+          <Image src={imgUrl.replace("/upload/","/upload/e_background_removal,b_rgb:a3a3a3/")} width={100} height={100} className="w-40 h-44 mx-auto rounded-xl object-cover" alt="Imagen" priority/>
+        </Link>
       </div>
       <h4 className="mt-4 font-medium text-center">{name}</h4>
       <p className="mt-2 font-bold text-center">{price}</p>
