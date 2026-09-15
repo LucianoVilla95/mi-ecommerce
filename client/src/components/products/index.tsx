@@ -45,7 +45,7 @@ const Products = async ({isAuthenticated, searchQuery, currentPage}: ProductsPro
       <div className="grid grid-cols-1 gap-2 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {
           fetchData.data.map((item) => (
-            <ProductItem key={item.id} productId={item.id} name={item.name} imgUrl={item.imgUrl} price={item.price} description={item.description} isAuthenticated={isAuthenticated} />
+            <ProductItem key={item.id} productId={item.id} name={item.name} imgUrl={item.imgUrl} price={item.price} description={item.description} isAuthenticated={isAuthenticated} slug={item.slug} />
           ))
         }
       </div>
