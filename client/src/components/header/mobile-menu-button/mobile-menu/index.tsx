@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 import { MobileMenuProps } from './types';
-import AcountButton from './acount-button';
+import AcountButton from './account-button';
 import LogoutButton from '../../auth-button/logout-button';
 import CloseButton from './close-button';
 
