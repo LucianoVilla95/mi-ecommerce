@@ -12,8 +12,10 @@ const SearchBar = (): JSX.Element => {
   const currentSearchParam = searchParams.get('search') || '';
 
   const [inputValue, setInputValue] = useState(currentSearchParam);
-  
-  const lastParamRef = useRef(currentSearchParam);
+
+  useEffect(() => {
+    setInputValue(currentSearchParam);
+  }, [currentSearchParam]);
 
   const handleSearchParams = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -27,7 +29,6 @@ const SearchBar = (): JSX.Element => {
       params.delete('search');
     }
 
-    lastParamRef.current = cleanTerm;
     replace(`${pathname}?${params.toString()}`);
   }, 400);
 
@@ -38,20 +39,11 @@ const SearchBar = (): JSX.Element => {
 
   const handleClear = () => {
     setInputValue('');
-    lastParamRef.current = '';
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', '1');
     params.delete('search');
     replace(`${pathname}?${params.toString()}`);
   };
-
-  useEffect(() => {
-    const urlSearch = searchParams.get('search') || '';
-    if (urlSearch !== lastParamRef.current) {
-      setInputValue(urlSearch);
-      lastParamRef.current = urlSearch;
-    }
-  }, [searchParams]);
 
   return (
     <div className="flex items-center border rounded-xl h-10 pl-2 focus-within:ring-2 focus-within:ring-black">
@@ -74,4 +66,3 @@ const SearchBar = (): JSX.Element => {
 };
 
 export default SearchBar;
-
