@@ -17,7 +17,7 @@ jest.mock('../../auth-button/logout-button', () => {
   };
 });
 
-jest.mock('./acount-button', () => {
+jest.mock('./account-button', () => {
   return function MockAcountButton() {
     return <div data-testid="mock-acount-button">Mock Acount Button</div>;
   };
