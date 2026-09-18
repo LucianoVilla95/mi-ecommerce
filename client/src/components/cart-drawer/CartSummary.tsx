@@ -2,9 +2,12 @@ import { JSX, useState } from 'react'
 import { useCartStore } from "@/stores/cart.store";
 import { useCart } from '@/hooks/use-cart';
 import { useRouter } from 'next/navigation';
+import { redirectToExternalUrl } from '@/services/navigation';
 
 const postCheckout = async () => {
-  const response = await fetch('http://localhost:3001/orders/checkout', {
+  const BACKEND_API_URL = process.env.BACKEND_API_URL;
+
+  const response = await fetch(`${BACKEND_API_URL}/orders/checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,7 +39,7 @@ const CartSummary = ({isAuthenticated}: {isAuthenticated: boolean}): JSX.Element
       const res = await postCheckout(); 
     
       if (res?.url) {
-        window.location.href = res.url;
+        redirectToExternalUrl(res.url);
       } else {
         throw new Error('No se recibió la URL de pago');
       }
