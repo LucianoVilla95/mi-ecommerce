@@ -5,6 +5,7 @@ import { FormState } from '../sign-up/types';
 import { registerSchema } from '../sign-up/types';
 import { cookies } from 'next/headers';
 
+const getBackendApiUrl = (): string => process.env.BACKEND_API_URL || '';
 const loginSchema = registerSchema.pick({ email: true, password: true });
 
 const extractHeaderToken = (header: string): string => {
@@ -33,7 +34,7 @@ export const signInUser = async (statePrevious: FormState | void, formData: Form
   const {email, password} = validacion.data;
   
   try {
-    const response = await fetch('http://localhost:3001/users/signin', {
+    const response = await fetch(`${getBackendApiUrl()}/users/signin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
