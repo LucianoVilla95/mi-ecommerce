@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import QueryProvider from "@/providers/query-provider";
+import CartDrawer from "@/components/cart-drawer";
+import { cookies } from 'next/headers';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,17 +26,17 @@ export const metadata: Metadata = {
   authors: [{ name: "AVORA" }],
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const isAuthenticated: boolean = cookieStore.has('access_token');
+  
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} data-scroll-behavior="smooth">
       <body className={`${geistSans.className} min-h-screen bg-white`}>
         <QueryProvider>
           <Header />
           {children}
+          <CartDrawer isAuthenticated={isAuthenticated} />
         </QueryProvider>
       </body>
     </html>
