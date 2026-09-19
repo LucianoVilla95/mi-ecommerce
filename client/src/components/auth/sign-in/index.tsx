@@ -39,7 +39,7 @@ const SignIn = (): JSX.Element => {
   }, [state?.success, router, syncCart, items]);
 
   return (
-    <main className="max-w-md mx-auto h-auto bg-gray-300 mt-24 px-6 py-6 border rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.50)]">
+    <main className="max-w-md mx-auto h-auto bg-gray-300 mt-24 mb-24 px-6 py-6 border rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.50)]">
       <section className="mb-6">
         <h1 className="text-4xl font-bold leading-tight">
           Bienvenido
@@ -47,21 +47,21 @@ const SignIn = (): JSX.Element => {
       </section>
       <form action={formAction} className="space-y-5">
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="email-input" className="text-sm font-medium">
             Correo electrónico
           </label>
-          <input type="email" name="email" placeholder="ejemplo@gmail.com" className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`email-${state?.fields?.email || ""}`} defaultValue={state?.fields?.email || ""} required/>
+          <input id="email-input" type="email" name="email" placeholder="ejemplo@gmail.com" className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`email-${state?.fields?.email || ""}`} defaultValue={state?.fields?.email || ""} required/>
           {state?.errors?.email && (
             <p className="text-red-500">{state.errors.email[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="password-input" className="text-sm font-medium">
             Contraseña
           </label>
           <div className="mt-2 h-14 border bg-white rounded-2xl px-5 flex items-center">
-            <input type={password ? "text" : "password"} name="password" placeholder="••••••••" className="flex-1 outline-none" key={`password-${state?.fields?.password || ""}`} defaultValue={state?.fields?.password || ""} required/>
-            <button type="button" onClick={() => setPassword(!password)}>
+            <input id="password-input" type={password ? "text" : "password"} name="password" placeholder="••••••••" className="flex-1 outline-none" key={`password-${state?.fields?.password || ""}`} defaultValue={state?.fields?.password || ""} required/>
+            <button type="button" onClick={() => setPassword(!password)} aria-label={password ? "Ocultar contraseña" : "Mostrar contraseña"}>
               {password ? (
                 <EyeOff className="w-5 h-5" />
               ) : (
