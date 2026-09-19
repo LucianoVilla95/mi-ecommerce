@@ -1,6 +1,5 @@
 import { JSX, Suspense } from 'react'; 
 import AnnouncementBar from "@/components/announcement-bar";
-import CartDrawer from "@/components/cart-drawer/index";
 import Categories from "@/components/categories";
 import Products from "@/components/products/index";
 import { cookies } from 'next/headers';
@@ -30,7 +29,6 @@ const Home = async ({ searchParams }: HomeProps): Promise<JSX.Element> => {
       <Suspense key={searchQuery} fallback={<div className="p-4 text-center text-gray-500">Buscando productos...</div>}>
         <Products isAuthenticated={isAuthenticated} searchQuery={searchQuery} currentPage={currentPage} />
       </Suspense>
-      <CartDrawer isAuthenticated={isAuthenticated} />
     </main>
   );
 }
