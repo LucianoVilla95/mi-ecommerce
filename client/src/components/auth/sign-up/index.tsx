@@ -11,7 +11,7 @@ const SignUp = (): JSX.Element => {
   const [password, setPassword] = useState<boolean>(false);
 
   return (
-    <main className="max-w-4xl mx-auto h-auto bg-gray-300 px-6 py-6 mt-20 border rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.50)]">
+    <main className="max-w-4xl mx-auto h-auto bg-gray-300 px-6 py-6 mt-20 mb-20 border rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.50)]">
       <section className="mb-6">
         <h1 className="text-4xl font-bold leading-tight">
           Crear cuenta
@@ -19,30 +19,30 @@ const SignUp = (): JSX.Element => {
       </section>
       <form action={formAction} className="space-y-0.5 grid grid-cols-2 gap-6">
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="name-input" className="text-sm font-medium">
             Nombre completo
           </label>
-          <input type="text" name="name" placeholder="Juan Pérez" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`name-${state?.fields?.name || ""}`} defaultValue={state?.fields?.name || ""}/>
+          <input id="name-input" type="text" name="name" placeholder="Juan Pérez" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`name-${state?.fields?.name || ""}`} defaultValue={state?.fields?.name || ""}/>
           {state?.errors?.name && (
             <p className="text-red-500">{state.errors.name[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="email-input" className="text-sm font-medium">
             Correo electrónico
           </label>
-          <input type="email" name="email" placeholder="ejemplo@gmail.com" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`email-${state?.fields?.email || ""}`} defaultValue={state?.fields?.email || ""}/>
+          <input id="email-input" type="email" name="email" placeholder="ejemplo@gmail.com" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`email-${state?.fields?.email || ""}`} defaultValue={state?.fields?.email || ""}/>
           {state?.errors?.email && (
             <p className="text-red-500">{state.errors.email[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="password-input" className="text-sm font-medium">
             Contraseña
           </label>
           <div className="mt-2 h-14 border bg-white rounded-2xl px-5 flex items-center">
-            <input type={password ? "text" : "password"} name="password" placeholder="••••••••" required className="flex-1 outline-none" key={`password-${state?.fields?.password || ""}`} defaultValue={state?.fields?.password || ""}/>
-            <button type="button" onClick={() => setPassword(!password)}>
+            <input id="password-input" type={password ? "text" : "password"} name="password" placeholder="••••••••" required className="flex-1 outline-none" key={`password-${state?.fields?.password || ""}`} defaultValue={state?.fields?.password || ""}/>
+            <button type="button" onClick={() => setPassword(!password)} aria-label={password ? "Ocultar contraseña" : "Mostrar contraseña"}>
               {password ? (
                 <EyeOff className="w-5 h-5" />
               ) : (
@@ -59,37 +59,37 @@ const SignUp = (): JSX.Element => {
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="phone-input" className="text-sm font-medium">
             Telefono
           </label>
-          <input type="text" name="phone" placeholder="Ej: +54 9 388 123 4567" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`phone-${state?.fields?.phone || ""}`} defaultValue={state?.fields?.phone || ""}/>
+          <input id="phone-input" type="text" name="phone" placeholder="Ej: +54 9 388 123 4567" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`phone-${state?.fields?.phone || ""}`} defaultValue={state?.fields?.phone || ""}/>
           {state?.errors?.phone && (
             <p className="text-red-500">{state.errors.phone[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="country-input" className="text-sm font-medium">
             Pais
           </label>
-          <input type="text" name="country" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`country-${state?.fields?.country || ""}`} defaultValue={state?.fields?.country || ""}/>
+          <input id="country-input" type="text" name="country" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`country-${state?.fields?.country || ""}`} defaultValue={state?.fields?.country || ""}/>
           {state?.errors?.country && (
             <p className="text-red-500">{state.errors.country[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="address-input" className="text-sm font-medium">
             Direccion
           </label>
-          <input type="text" name="address" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`address-${state?.fields?.address || ""}`} defaultValue={state?.fields?.address || ""}/>
+          <input id="address-input" type="text" name="address" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`address-${state?.fields?.address || ""}`} defaultValue={state?.fields?.address || ""}/>
           {state?.errors?.address && (
             <p className="text-red-500">{state.errors.address[0]}</p>
           )}
         </div>
         <div>
-          <label className="text-sm font-medium">
+          <label htmlFor="city-input" className="text-sm font-medium">
             Ciudad
           </label>
-          <input type="text" name="city" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`city-${state?.fields?.city || ""}`} defaultValue={state?.fields?.city || ""}/>
+          <input id="city-input" type="text" name="city" required className="mt-2 w-full h-14 rounded-2xl border bg-white px-5 outline-none focus:border-black" key={`city-${state?.fields?.city || ""}`} defaultValue={state?.fields?.city || ""}/>
           {state?.errors?.city && (
             <p className="text-red-500">{state.errors.city[0]}</p>
           )}
