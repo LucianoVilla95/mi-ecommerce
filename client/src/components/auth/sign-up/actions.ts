@@ -5,6 +5,8 @@ import { FormState } from './types';
 import { z } from 'zod';
 import { registerSchema } from "./types";
 
+const getBackendApiUrl = (): string => process.env.BACKEND_API_URL || '';
+
 export const signUpUser = async (statePrevious: FormState | void, formData: FormData): Promise<FormState | void> => {
   const data = Object.fromEntries(formData.entries());
   const validacion = registerSchema.safeParse(data);
@@ -32,7 +34,7 @@ export const signUpUser = async (statePrevious: FormState | void, formData: Form
   const {name, email, password, phone, country, address, city} = validacion.data;
 
   try {
-    const response = await fetch('http://localhost:3001/users/signup', {
+    const response = await fetch(`${getBackendApiUrl()}/users/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
