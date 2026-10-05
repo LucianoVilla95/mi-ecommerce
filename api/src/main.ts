@@ -21,6 +21,9 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
     transform: true,
     stopAtFirstError: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    }
   }))
 
   const swaggerConfig = new DocumentBuilder()
