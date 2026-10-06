@@ -84,6 +84,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('file'))
   @Patch(':id')
   @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: ProductsBodySwaggerDto })
   @ApiOperation({ 
     summary: 'Actualizar un producto existente (Solo Admin)', 
     description: 'Modifica las propiedades de un producto por su UUID. La imagen es opcional.' 
