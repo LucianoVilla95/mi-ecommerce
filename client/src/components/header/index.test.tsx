@@ -3,12 +3,18 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import Header from './index'; // Asegurá la ruta exacta si tu archivo se llama diferente
 
-// CORRECCIÓN DEFINITIVA: Guardamos el estado de forma dinámica en global para esquivar el hoisting de Jest
+// CORRECCIÓN DEFINITIVA: Extendemos el objeto global de NodeJS de forma limpia para este archivo de pruebas
+declare global {
+  // eslint-disable-next-line no-var
+  var mockCookieStore: Record<string, boolean> | undefined;
+}
+
+// CORRECCIÓN DEFINITIVA: Guardamos el estado de forma dinámica en global para esquivar el hoisting de Jest sin usar 'any'
 jest.mock('next/headers', () => {
   return {
     cookies: jest.fn().mockResolvedValue({
       has: jest.fn((key: string) => {
-        return !!(global as any).mockCookieStore?.[key];
+        return !!global.mockCookieStore?.[key];
       }),
     }),
   };
@@ -54,13 +60,13 @@ jest.mock('./cart-button', () => {
 describe('Header Component (Server Component)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Inicializamos nuestro objeto de cookies simulado vacío antes de cada test
-    (global as any).mockCookieStore = {};
+    // Inicializamos nuestro objeto de cookies simulado vacío antes de cada test de forma tipada
+    global.mockCookieStore = {};
   });
 
   it('should render structural common pieces and AuthButton when user is NOT authenticated', async () => {
     // Simulamos que el token NO existe dejando el almacén vacío
-    (global as any).mockCookieStore = { 'access_token': false };
+    global.mockCookieStore = { 'access_token': false };
 
     // Resolvemos el Server Component de forma asíncrona antes del renderizado
     const HeaderComponent = await Header();
@@ -79,7 +85,7 @@ describe('Header Component (Server Component)', () => {
 
   it('should render structural common pieces and LogoutButton when user IS authenticated', async () => {
     // Simulamos que la cookie 'access_token' SÍ existe dándole un valor real
-    (global as any).mockCookieStore = { 'access_token': true };
+    global.mockCookieStore = { 'access_token': true };
 
     const HeaderComponent = await Header();
     render(HeaderComponent);
