@@ -1,5 +1,5 @@
 'use client'
-import { JSX, useState, useEffect, useRef } from 'react';
+import { JSX, useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useDebouncedCallback } from 'use-debounce';
