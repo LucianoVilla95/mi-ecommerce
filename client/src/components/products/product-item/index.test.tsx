@@ -10,9 +10,20 @@ const mockUseCartStore = jest.fn();
 const mockMutate = jest.fn();
 const mockUseCart = jest.fn();
 
-// 2. Vinculación de los módulos importados con los espías configurados
+// Definimos el tipo de ítem mínimo que vive en el store local
+interface CartItemMin {
+  productId: string;
+}
+
+// Interfaz para definir la estructura del Zustand store para este componente
+interface ProductItemState {
+  addItem: (item: unknown) => void;
+  items: CartItemMin[];
+}
+
+// 2. Vinculación de los módulos importados con los espías configurados sin usar 'any'
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: (state: any) => any) => mockUseCartStore(selector),
+  useCartStore: (selector: (state: ProductItemState) => unknown) => mockUseCartStore(selector),
 }));
 
 jest.mock('@/hooks/use-add-to-cart', () => ({
@@ -52,7 +63,7 @@ describe('ProductItem Component (Client Component)', () => {
     // Estado inicial por defecto: Carritos vacíos (Botón habilitado por defecto)
     mockUseCart.mockReturnValue({ data: { details: [] } });
     
-    mockUseCartStore.mockImplementation((selector: (state: any) => any) =>
+    mockUseCartStore.mockImplementation((selector: (state: ProductItemState) => unknown) =>
       selector({
         addItem: mockAddItem,
         items: [],
@@ -103,8 +114,8 @@ describe('ProductItem Component (Client Component)', () => {
   });
 
   it('should disable the button and show Check icon if product is already in local cart store', () => {
-    // Forzamos que Zustand devuelva el array con el producto repetido
-    mockUseCartStore.mockImplementation((selector: (state: any) => any) =>
+    // Forzamos que Zustand devuelva el array con el producto repetido de forma tipada
+    mockUseCartStore.mockImplementation((selector: (state: ProductItemState) => unknown) =>
       selector({
         addItem: mockAddItem,
         items: [{ productId: 'prod-123' }],
