@@ -8,9 +8,20 @@ jest.mock('next/headers', () => ({
   cookies: jest.fn(),
 }));
 
-// 2. Mock del componente de cliente para aislar la prueba
+// Interfaz para el producto consumido por el mock
+interface ProductMock {
+  name: string;
+}
+
+// Interfaz para las propiedades de AddToCartButton
+interface MockAddToCartButtonProps {
+  product: ProductMock;
+  isAuthenticated: boolean;
+}
+
+// 2. Mock del componente de cliente para aislar la prueba de forma segura
 jest.mock('./add-to-cart-button', () => {
-  return function MockAddToCartButton({ product, isAuthenticated }: any) {
+  return function MockAddToCartButton({ product, isAuthenticated }: MockAddToCartButtonProps) {
     return (
       <button data-testid="add-to-cart-mock">
         {`Button - Auth: ${isAuthenticated} - Product: ${product.name}`}
@@ -19,10 +30,16 @@ jest.mock('./add-to-cart-button', () => {
   };
 });
 
-// 1. RECOGE EL MOCK DE NEXT/IMAGE DE ESTA MANERA
+// Interfaz para las propiedades de Image
+interface MockImageProps {
+  src: string;
+  alt: string;
+}
+
+// 1. RECOGE EL MOCK DE NEXT/IMAGE DE ESTA MANERA SIN 'ANY' Y CON SILENCIADOR DE NEXT.JS
 jest.mock('next/image', () => {
-  return function MockImage(props: any) {
-    // Inyectamos todo el objeto de props para no perder ninguna propiedad
+  return function MockImage(props: MockImageProps) {
+    // eslint-disable-next-line @next/next/no-img-element
     return <img data-testid="product-image" src={props.src} alt={props.alt} />;
   };
 });
@@ -74,9 +91,9 @@ describe('ProductDetailPage (Server Component)', () => {
 
     // Verificar textos en pantalla
     expect(screen.getByRole('heading', { name: 'Zapatillas Running', level: 1 })).toBeInTheDocument();
-    expect(screen.getByText('$89.99')).toBeInTheDocument();
+    expect(screen.getByText('\$89.99')).toBeInTheDocument();
     expect(screen.getByText('Zapatillas de alta calidad para correr.')).toBeInTheDocument();
-    expect(screen.getByText('Envío gratis en compras mayores a $50')).toBeInTheDocument();
+    expect(screen.getByText('Envío gratis en compras mayores a \$50')).toBeInTheDocument();
   });
 
   it('should apply the background transformations to the Cloudinary image URL', async () => {
