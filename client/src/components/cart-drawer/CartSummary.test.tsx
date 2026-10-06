@@ -11,13 +11,18 @@ const mockUseCart = jest.fn();
 const mockFetch = jest.fn() as jest.Mock;
 const mockRedirectToExternalUrl = jest.fn(); // Espía limpio para la URL externa
 
+// Interfaz para definir la forma mínima del estado consumido por el resumen
+interface CartSummaryState {
+  subtotal: () => number;
+}
+
 // 2. Vinculación de dependencias con los espías de Jest
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: any) => mockUseCartStore(selector),
+  useCartStore: (selector: (state: CartSummaryState) => unknown) => mockUseCartStore(selector),
 }));
 
 jest.mock('@/hooks/use-cart', () => ({
@@ -26,7 +31,7 @@ jest.mock('@/hooks/use-cart', () => ({
 
 // Mockeamos el nuevo servicio utilitario de navegación de forma aislada
 jest.mock('@/services/navigation', () => ({
-  redirectToExternalUrl: (...args: any[]) => mockRedirectToExternalUrl(...args),
+  redirectToExternalUrl: (...args: unknown[]) => mockRedirectToExternalUrl(...args),
 }));
 
 global.fetch = mockFetch;
@@ -42,8 +47,10 @@ describe('CartSummary Component (Client Component with Clean Architecture)', () 
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(window, 'alert').mockImplementation(() => {});
 
-    // Configuración inicial base para Zustand y useCart
-    mockUseCartStore.mockImplementation((selector: any) => selector({ subtotal: () => 1500.00 }));
+    // Configuración inicial base para Zustand y useCart de manera tipada
+    mockUseCartStore.mockImplementation((selector: (state: CartSummaryState) => unknown) => 
+      selector({ subtotal: () => 1500.00 })
+    );
     mockUseCart.mockReturnValue({ data: { total: 3500.00 } });
   });
 
