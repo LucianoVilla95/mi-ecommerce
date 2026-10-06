@@ -14,9 +14,16 @@ const mockAddToCartMutate = jest.fn();
 const mockDecreaseCartMutate = jest.fn();
 const mockRemoveCartMutate = jest.fn();
 
+// Definimos la estructura de las acciones del store para evitar el 'any'
+interface CartActionsState {
+  increaseQuantity: (id: string) => void;
+  decreaseQuantity: (id: string) => void;
+  removeItem: (id: string) => void;
+}
+
 // 2. Mocks de las dependencias externas vinculadas a los espías
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: any) =>
+  useCartStore: (selector: (state: CartActionsState) => unknown) =>
     selector({
       increaseQuantity: mockIncreaseQuantity,
       decreaseQuantity: mockDecreaseQuantity,
