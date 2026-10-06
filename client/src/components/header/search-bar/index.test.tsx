@@ -22,11 +22,11 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/shop',
 }));
 
-// 2. CORRECCIÓN DEFINITIVA: Forzamos que el debounce sea síncrono e instantáneo en el entorno de tests
+// 2. CORRECCIÓN DEFINITIVA: Forzamos que el debounce sea síncrono e instantáneo en el entorno de tests sin usar 'any'
 jest.mock('use-debounce', () => ({
-  useDebouncedCallback: (callback: (...args: any[]) => void) => {
-    // Al retornar el callback directo de forma síncrona, eliminamos los problemas de temporizadores
-    return jest.fn((...args: any[]) => callback(...args));
+  useDebouncedCallback: (callback: (...args: unknown[]) => void) => {
+    // Al retornar el callback directo de forma síncrona, eliminamos los problemas de temporizadores de manera tipada
+    return jest.fn((...args: unknown[]) => callback(...args));
   },
 }));
 
