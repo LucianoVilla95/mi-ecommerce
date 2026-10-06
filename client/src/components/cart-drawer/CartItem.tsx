@@ -27,7 +27,7 @@ const CartItem = ({productId, orderDetailId , name, price, image, quantity, desc
     if (isAuthenticated) {
       handleAddToCart({ productId, quantity: 1 },
         {
-          onError: (error: any) => {
+          onError: (error: Error) => {
             setStockError(error.message || "Stock insuficiente");
           }
         }
