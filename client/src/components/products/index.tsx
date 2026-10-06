@@ -33,7 +33,7 @@ const Products = async ({isAuthenticated, searchQuery, currentPage}: ProductsPro
   if (!fetchData.data || fetchData.data.length === 0) {
     return (
       <div className="p-4 text-center text-gray-500 col-span-full">
-        No se encontraron productos para "{searchQuery}"
+        {`No se encontraron productos para "${searchQuery}"`}
       </div>
     );
   }
