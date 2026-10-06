@@ -10,11 +10,26 @@ jest.mock('@/stores/uicart.store', () => ({
   useUICartStore: () => mockUseUICartStore(),
 }));
 
+// Definición de tipos para los componentes mockeados de la UI
+interface SheetProps {
+  children: React.ReactNode;
+  open: boolean;
+}
+
+interface SheetContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface SheetTitleProps {
+  children: React.ReactNode;
+}
+
 // 2. Mock simplificado de la librería Sheet de Radix/Shadcn para no lidiar con animaciones complejas en Jest
 jest.mock('@/components/ui/sheet', () => ({
-  Sheet: ({ children, open }: any) => open ? <div data-testid="sheet-root">{children}</div> : null,
-  SheetContent: ({ children, className }: any) => <div className={className} data-testid="sheet-content">{children}</div>,
-  SheetTitle: ({ children }: any) => <div data-testid="sheet-title">{children}</div>,
+  Sheet: ({ children, open }: SheetProps) => open ? <div data-testid="sheet-root">{children}</div> : null,
+  SheetContent: ({ children, className }: SheetContentProps) => <div className={className} data-testid="sheet-content">{children}</div>,
+  SheetTitle: ({ children }: SheetTitleProps) => <div data-testid="sheet-title">{children}</div>,
 }));
 
 // 3. Mockeo de los tres componentes hijos para aislar el contenedor
