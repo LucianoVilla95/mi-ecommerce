@@ -7,9 +7,14 @@ import CartHeader from './CartHeader'; // Ajustá la ruta si es necesario
 const mockUseCartStore = jest.fn();
 const mockUseCart = jest.fn();
 
+// Definimos la estructura mínima del estado de Zustand para remover el any
+interface CartState {
+  totalItems: () => number;
+}
+
 // 2. Mock de las dependencias externas vinculadas a nuestros espías
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: any) => mockUseCartStore(selector),
+  useCartStore: (selector: (state: CartState) => unknown) => mockUseCartStore(selector),
 }));
 
 jest.mock('@/hooks/use-cart', () => ({
@@ -26,8 +31,8 @@ describe('CartHeader Component', () => {
     // Configuración base por defecto (Carrito de base de datos vacío)
     mockUseCart.mockReturnValue({ data: { details: [] } });
 
-    // Implementación base para Zustand: resuelve el selector dándole la función espía
-    mockUseCartStore.mockImplementation((selector: any) =>
+    // Implementación base para Zustand: resuelve el selector dándole la función espía de forma tipada
+    mockUseCartStore.mockImplementation((selector: (state: CartState) => unknown) =>
       selector({
         totalItems: mockTotalItemsFn,
       })
