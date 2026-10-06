@@ -4,9 +4,16 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MenuButton from './index'; // Ajustá la ruta exacta si tu componente se llama diferente
 
-// Mockeamos el componente hijo MobileMenu para aislar el comportamiento de MenuButton
+// Interfaz para tipar de forma estricta las propiedades del componente MockMobileMenu
+interface MockMobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  isLoggedIn: boolean;
+}
+
+// Mockeamos el componente hijo MobileMenu para aislar el comportamiento de MenuButton de forma segura
 jest.mock('./mobile-menu', () => {
-  return function MockMobileMenu({ isOpen, onClose, isLoggedIn }: any) {
+  return function MockMobileMenu({ isOpen, onClose, isLoggedIn }: MockMobileMenuProps) {
     return (
       <div data-testid="mock-mobile-menu">
         <span>Status: {isOpen ? 'Open' : 'Closed'}</span>
