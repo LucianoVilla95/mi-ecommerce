@@ -12,7 +12,7 @@ const mockUseCartStore = jest.fn();
 
 // 2. Mock de las dependencias externas
 jest.mock('./actions', () => ({
-  signInUser: (...args: any[]) => mockSignInUser(...args),
+  signInUser: (...args: unknown[]) => mockSignInUser(...args),
 }));
 
 jest.mock('next/navigation', () => ({
@@ -27,13 +27,25 @@ jest.mock('@/hooks/use-sync-cart', () => ({
   }),
 }));
 
+// Definimos una estructura mínima para el estado del carrito
+interface CartState {
+  items: Array<{ productId: string; name: string; price: number }>;
+}
+
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: any) => mockUseCartStore(selector),
+  useCartStore: (selector: (state: CartState) => unknown) => mockUseCartStore(selector),
 }));
+
+// Interfaz para el mock de Next Link
+interface MockLinkProps {
+  children: React.ReactNode;
+  href: string;
+  className?: string;
+}
 
 // Copiá y pegá esta línea debajo de tus otros jest.mock para limpiar el warning del act()
 jest.mock('next/link', () => {
-  return function MockNextLink({ children, href, className }: any) {
+  return function MockNextLink({ children, href, className }: MockLinkProps) {
     return <a href={href} className={className}>{children}</a>;
   };
 });
@@ -45,7 +57,7 @@ describe('SignIn Component (Client Component)', () => {
     jest.useFakeTimers(); // Necesario para controlar el setTimeout de 150ms del useEffect
 
     // Estado inicial por defecto: carrito vacío
-    mockUseCartStore.mockImplementation((selector: any) =>
+    mockUseCartStore.mockImplementation((selector: (state: CartState) => unknown) =>
       selector({ items: [] })
     );
   });
@@ -121,7 +133,7 @@ describe('SignIn Component (Client Component)', () => {
       jest.fn(),
       false,
     ]);
-    mockUseCartStore.mockImplementation((selector: any) =>
+    mockUseCartStore.mockImplementation((selector: (state: CartState) => unknown) =>
       selector({ items: [] })
     );
 
@@ -142,7 +154,7 @@ describe('SignIn Component (Client Component)', () => {
       jest.fn(),
       false,
     ]);
-    mockUseCartStore.mockImplementation((selector: any) =>
+    mockUseCartStore.mockImplementation((selector: (state: CartState) => unknown) =>
       selector({ items: [{ productId: 'prod-1', name: 'Item', price: 10 }] })
     );
 
