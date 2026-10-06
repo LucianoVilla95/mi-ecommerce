@@ -11,6 +11,7 @@ import { RolesGuard } from '../guards/roles.guard';
 import { ProductsUpdateDto } from './dtos/productsUpdateDto.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiConsumes, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ProductsBodySwaggerDto } from './dtos/productsBodySwaggerDto.dto';
+import { ProductsUpdateSwaggerDto } from './dtos/productsUpdateSwaggerDto.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -84,7 +85,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('file'))
   @Patch(':id')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: ProductsBodySwaggerDto })
+  @ApiBody({ type: ProductsUpdateSwaggerDto })
   @ApiOperation({ 
     summary: 'Actualizar un producto existente (Solo Admin)', 
     description: 'Modifica las propiedades de un producto por su UUID. La imagen es opcional.' 
