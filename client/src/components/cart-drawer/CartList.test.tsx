@@ -7,9 +7,25 @@ import CartList from './CartList'; // Ajustá la ruta si cambia la mayúscula/mi
 const mockUseCartStore = jest.fn();
 const mockUseCart = jest.fn();
 
+// Definimos el tipo de item individual basado en tus mockLocalItems
+interface LocalCartItem {
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  description: string;
+  stock: number;
+}
+
+// Interfaz para el estado de Zustand consumido por este test
+interface CartListState {
+  items: LocalCartItem[];
+}
+
 // 2. Mock de las dependencias externas vinculadas a los espías
 jest.mock('@/stores/cart.store', () => ({
-  useCartStore: (selector: any) => mockUseCartStore(selector),
+  useCartStore: (selector: (state: CartListState) => unknown) => mockUseCartStore(selector),
 }));
 
 jest.mock('@/hooks/use-cart', () => ({
@@ -36,7 +52,7 @@ jest.mock('./CartItem', () => {
 
 describe('CartList Component', () => {
   // Datos locales mockeados para Zustand
-  const mockLocalItems = [
+  const mockLocalItems: LocalCartItem[] = [
     { productId: '1', name: 'Zapatillas', price: 5000, image: '/zapas.png', quantity: 1, description: 'Talle 41', stock: 3 },
     { productId: '2', name: 'Remera', price: 2000, image: '/remera.png', quantity: 2, description: 'Color Negro', stock: 5 },
   ];
@@ -57,7 +73,7 @@ describe('CartList Component', () => {
 
     // Configuración base por defecto
     mockUseCart.mockReturnValue({ data: undefined, isLoading: false });
-    mockUseCartStore.mockImplementation((selector: any) =>
+    mockUseCartStore.mockImplementation((selector: (state: CartListState) => unknown) =>
       selector({ items: [] })
     );
   });
@@ -73,8 +89,8 @@ describe('CartList Component', () => {
   });
 
   it('should render items from local Zustand store when user is NOT authenticated', () => {
-    // Inyectamos productos locales en Zustand
-    mockUseCartStore.mockImplementation((selector: any) =>
+    // Inyectamos productos locales en Zustand de forma tipada
+    mockUseCartStore.mockImplementation((selector: (state: CartListState) => unknown) =>
       selector({ items: mockLocalItems })
     );
 
