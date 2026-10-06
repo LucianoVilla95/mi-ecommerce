@@ -7,9 +7,14 @@ import CartButton from './index'; // Ajustá la ruta exacta si tu componente se 
 // 1. Espía global para interceptar el Store de la UI del carrito
 const mockOpenCart = jest.fn();
 
-// 2. Mock de Zustand que resuelve el selector devolviendo nuestra función espía
+// Definimos la estructura del estado de la UI del carrito para remover el 'any'
+interface UICartState {
+  openCart: () => void;
+}
+
+// 2. Mock de Zustand que resuelve el selector devolviendo nuestra función espía de forma tipada
 jest.mock('@/stores/uicart.store', () => ({
-  useUICartStore: (selector: any) =>
+  useUICartStore: (selector: (state: UICartState) => unknown) =>
     selector({
       openCart: mockOpenCart,
     }),
