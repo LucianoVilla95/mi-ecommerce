@@ -3,10 +3,16 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SignupButton from './index'; // Ajustá la ruta si tu archivo se llama diferente
 
+// Interfaz para tipar de forma estricta las propiedades del Mock del Link
+interface MockLinkProps {
+  children: React.ReactNode;
+  href: string;
+}
+
 // CORRECCIÓN PARA EL ACT(): Mockeamos Next Link para que sea un tag <a> estático común
 // Esto frena los procesos de pre-fetch en segundo plano de Next.js que ensucian la consola
 jest.mock('next/link', () => {
-  return function MockNextLink({ children, href }: any) {
+  return function MockNextLink({ children, href }: MockLinkProps) {
     return <a href={href}>{children}</a>;
   };
 });
