@@ -1,12 +1,18 @@
 import { signInUser } from './actions'; // Ajustá la ruta si es necesario
 
+// CORRECCIÓN: Extendemos el objeto global de NodeJS de forma limpia para este archivo de pruebas
+declare global {
+  // eslint-disable-next-line no-var
+  var lastCookieSetCall: unknown[] | undefined;
+}
+
 // 1. Mock de cookies de Next.js moderno (devuelve una promesa)
 jest.mock('next/headers', () => {
   return {
     cookies: jest.fn().mockResolvedValue({
-      set: jest.fn((...args) => {
-        // Esto intercepta dinámicamente las llamadas y las guarda en el registro global de Jest
-        (global as any).lastCookieSetCall = args;
+      set: jest.fn((...args: unknown[]) => {
+        // Esto intercepta dinámicamente las llamadas y las guarda en el registro global de Jest sin usar 'any'
+        global.lastCookieSetCall = args;
       }),
     }),
   };
@@ -24,7 +30,7 @@ describe('signInUser Server Action', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (global as any).lastCookieSetCall = undefined; // Limpiamos la llamada residual de cookies
+    global.lastCookieSetCall = undefined; // Limpiamos de forma tipada
     // Forzamos la variable de entorno para que el fetch la use dinámicamente
     process.env.BACKEND_API_URL = 'http://api.test';
   });
@@ -96,8 +102,8 @@ describe('signInUser Server Action', () => {
     const formData = createFormData('valid@user.com', VALID_PASSWORD);
     const result = await signInUser(undefined, formData);
 
-    // Verificamos que se extrajo el token del string y se guardó en la cookie de Next
-    expect((global as any).lastCookieSetCall).toEqual([
+    // Verificamos que se extrajo el token del string y se guardó en la cookie de Next de forma 100% tipada
+    expect(global.lastCookieSetCall).toEqual([
       'access_token',
       'token_secreto_abc123',
       expect.objectContaining({
