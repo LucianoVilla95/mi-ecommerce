@@ -7,12 +7,19 @@ import SignUp from './index'; // Ajustá la ruta si tu componente se llama disti
 // Mock de la Server Action de registro para evitar llamadas reales a la API
 const mockSignUpUser = jest.fn();
 jest.mock('./actions', () => ({
-  signUpUser: (...args: any[]) => mockSignUpUser(...args),
+  signUpUser: (...args: unknown[]) => mockSignUpUser(...args),
 }));
+
+// Interfaz para las props de Next Link
+interface MockLinkProps {
+  children: React.ReactNode;
+  href: string;
+  className?: string;
+}
 
 // Mock de Next Link para silenciar las advertencias automáticas de act() de Next.js
 jest.mock('next/link', () => {
-  return function MockNextLink({ children, href, className }: any) {
+  return function MockNextLink({ children, href, className }: MockLinkProps) {
     return <a href={href} className={className}>{children}</a>;
   };
 });
@@ -101,3 +108,4 @@ describe('SignUp Component (Client Component)', () => {
     expect(screen.getByText('El correo electrónico ya está registrado')).toBeInTheDocument();
   });
 });
+
