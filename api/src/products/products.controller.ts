@@ -95,10 +95,9 @@ export class ProductsController {
   @ApiResponse({ status: 400, description: 'UUID inválido o formato de archivo incorrecto.' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
   async updateProduct(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: ProductsUpdateDto, @UploadedFile(new ParseFilePipe({
-    fileIsRequired: false,
     validators: [
       new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
-      new FileTypeValidator({ fileType: /(^$|jpg|jpeg|png|webp)$/ })
+      new FileTypeValidator({ fileType: /(jpg|jpeg|png|webp)$/ })
     ]
   })) file?: Express.Multer.File): Promise<{message: string}> {
     return await this.productsService.updateProduct(id, body, file);
