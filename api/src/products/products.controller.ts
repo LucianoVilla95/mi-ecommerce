@@ -98,7 +98,7 @@ export class ProductsController {
     fileIsRequired: false,
     validators: [
       new MaxFileSizeValidator({maxSize: 1024 * 1024 * 5}),
-      new FileTypeValidator({fileType: /(jpg|jpeg|png|webp)$/})
+      new FileTypeValidator({ fileType: /(^$|jpg|jpeg|png|webp)$/ })
     ]
   })) file?: Express.Multer.File): Promise<{message: string}> {
     return await this.productsService.updateProduct(id, body, file);
